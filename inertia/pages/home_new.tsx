@@ -1,0 +1,129 @@
+import React, { useState } from 'react'
+import { Head } from '@inertiajs/react'
+import Layout from '@/components/layout'
+import { Project, Tag } from '@/types'
+
+interface HomeProps {
+  projects: Project[]
+  tags: Tag[]
+}
+
+export default function Home({ projects = [], tags = [] }: HomeProps) {
+  const [statusFilter, setStatusFilter] = useState<'all' | 'en_cours' | 'termine'>('all')
+  const [dimensionFilter, setDimensionFilter] = useState<'all' | 'overworld' | 'nether' | 'end'>('all')
+  const [tagFilter, setTagFilter] = useState<number | 'all'>('all')
+
+  const filteredProjects = projects.filter(project => {
+    if (statusFilter !== 'all' && project.status !== statusFilter) return false
+    if (dimensionFilter !== 'all' && project.dimension !== dimensionFilter) return false
+    if (tagFilter !== 'all' && project.tagId !== tagFilter) return false
+    return true
+  })
+
+  return (
+    <Layout>
+      <Head title="Accueil" />
+      
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-4">Bienvenue sur Aystone2-Dirt</h1>
+        <p className="text-lg">
+          Découvrez les projets des joueurs de l'instance "dirt" du serveur Minecraft Aystone.
+        </p>
+      </div>
+
+      <div className="mb-6 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+        <h2 className="text-xl font-semibold mb-4">Filtres</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block mb-2">Statut</label>
+            <select 
+              className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as any)}
+            >
+              <option value="all">Tous</option>
+              <option value="en_cours">En cours</option>
+              <option value="termine">Terminé</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block mb-2">Dimension</label>
+            <select 
+              className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+              value={dimensionFilter}
+              onChange={(e) => setDimensionFilter(e.target.value as any)}
+            >
+              <option value="all">Toutes</option>
+              <option value="overworld">Overworld</option>
+              <option value="nether">Nether</option>
+              <option value="end">End</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block mb-2">Tag</label>
+            <select 
+              className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+              value={tagFilter}
+              onChange={(e) => setTagFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+            >
+              <option value="all">Tous</option>
+              {tags.map(tag => (
+                <option key={tag.id} value={tag.id}>{tag.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredProjects.length > 0 ? (
+          filteredProjects.map(project => (
+            <div key={project.id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition dark:border-gray-700">
+              <div className={`p-4 ${project.status === 'en_cours' ? 'bg-yellow-100 dark:bg-yellow-900' : 'bg-green-100 dark:bg-green-900'}`}>
+                <h3 className="text-xl font-bold">{project.name}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Par {project.user?.username} • {project.dimension} • {project.tag?.label}
+                </p>
+              </div>
+              
+              <div className="p-4">
+                <p className="mb-4">{project.description.substring(0, 100)}...</p>
+                
+                <div className="mb-4">
+                  <span className="font-semibold">Coordonnées:</span> X: {project.x}, Y: {project.y}, Z: {project.z}
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className={`px-2 py-1 rounded text-sm ${
+                    project.status === 'en_cours' 
+                      ? 'bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200' 
+                      : 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200'
+                  }`}>
+                    {project.status === 'en_cours' ? 'En cours' : 'Terminé'}
+                  </span>
+                  
+                  {project.dynmapUrl && (
+                    <a 
+                      href={project.dynmapUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                    >
+                      Voir sur la dynmap
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="col-span-full text-center py-8">
+            <p className="text-xl text-gray-500 dark:text-gray-400">Aucun projet ne correspond à vos critères de recherche.</p>
+          </div>
+        )}
+      </div>
+    </Layout>
+  )
+}
