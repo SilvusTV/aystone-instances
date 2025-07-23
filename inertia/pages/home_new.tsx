@@ -27,7 +27,7 @@ export default function Home({ projects = [], tags = [] }: HomeProps) {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Bienvenue sur Aystone2-Dirt</h1>
         <p className="text-lg">
-          Découvrez les projets des joueurs de l'instance "dirt" du serveur Minecraft Aystone.
+          Découvrez les projets des joueurs de l'instance "dirt" du serveur Minecraft Aystone2.
         </p>
       </div>
 
