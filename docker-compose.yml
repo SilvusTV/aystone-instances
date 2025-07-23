@@ -1,54 +1,18 @@
-version: '3.8'
+version: "3.9"
 
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: aystone2-dirt-postgres
+
+  db:
+    image: postgres:15
+    container_name: aystone2-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: aystone2_dirt
+      POSTGRES_DB: aystone
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Node.js Application
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: aystone2-dirt-app
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      NODE_ENV: development
-      PORT: 3333
-      HOST: 0.0.0.0
-      APP_KEY: your-app-key-here
-      DB_CONNECTION: pg
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_DATABASE: aystone2_dirt
-      SESSION_DRIVER: cookie
-    ports:
-      - "3333:3333"
-      - "5173:5173" # For Vite dev server
-    volumes:
-      - .:/app
-      - /app/node_modules
-    restart: unless-stopped
-    command: sh -c "node ace migration:run && npm run dev"
+      - pgdata:/var/lib/postgresql/data
 
 volumes:
-  postgres_data:
+  pgdata:

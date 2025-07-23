@@ -16,8 +16,8 @@ export default function Layout({ children }: LayoutProps) {
   }
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
-      <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+    <div className={`${darkMode ? 'dark' : ''} overflow-x-hidden`}>
+      <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
         <header className="bg-primary-500 text-white shadow-md">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <div className="flex items-center">
@@ -76,7 +76,7 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </header>
 
-        <main className="container mx-auto px-4 py-8">
+        <main className="flex-1 container mx-auto px-4 py-8">
           {children}
         </main>
 
