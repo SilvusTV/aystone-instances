@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, usePage } from '@inertiajs/react'
 import { PageProps } from '@/types'
 
@@ -9,10 +9,85 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const { auth = { user: null } } = usePage<PageProps>().props
   const [darkMode, setDarkMode] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Function to get CSRF token from cookie
+  const getCsrfToken = () => {
+    const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'))
+    return match ? decodeURIComponent(match[2]) : null
+  }
+
+  // Load user's dark mode preference on component mount
+  useEffect(() => {
+    if (auth.user) {
+      // If user is logged in, try to get their preference from the database
+      fetch(`/api/config/darkMode`, {
+        headers: {
+          'X-XSRF-TOKEN': getCsrfToken() || '',
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          const isDarkMode = data.value === 'true'
+          setDarkMode(isDarkMode)
+          if (isDarkMode) {
+            document.documentElement.classList.add('dark')
+          } else {
+            document.documentElement.classList.remove('dark')
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching dark mode preference:', error)
+          // Default to light mode on error
+          setDarkMode(false)
+          document.documentElement.classList.remove('dark')
+        })
+        .finally(() => {
+          setIsLoading(false)
+        })
+    } else {
+      // If user is not logged in, use localStorage
+      const savedMode = localStorage.getItem('darkMode')
+      const isDarkMode = savedMode === 'true'
+      setDarkMode(isDarkMode)
+      if (isDarkMode) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+      setIsLoading(false)
+    }
+  }, [auth.user])
 
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode)
-    document.documentElement.classList.toggle('dark')
+    const newDarkMode = !darkMode
+    setDarkMode(newDarkMode)
+
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+
+    if (auth.user) {
+      // If user is logged in, save preference to database
+      fetch('/api/config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-XSRF-TOKEN': getCsrfToken() || '',
+        },
+        body: JSON.stringify({
+          key: 'darkMode',
+          value: newDarkMode.toString(),
+        }),
+      }).catch((error) => {
+        console.error('Error saving dark mode preference:', error)
+      })
+    } else {
+      // If user is not logged in, save to localStorage
+      localStorage.setItem('darkMode', newDarkMode.toString())
+    }
   }
 
   return (
@@ -43,9 +118,11 @@ export default function Layout({ children }: LayoutProps) {
 
               {auth.user ? (
                 <div className="flex items-center space-x-4">
+                  {['joueur', 'admin'].includes(auth.user.role) && (
                   <Link href="/dashboard" className="hover:text-primary-200 transition">
                     Mon profil
                   </Link>
+                    )}
                   <div className="flex items-center space-x-2">
                     <img
                       src={`https://mineskin.eu/helm/${auth.user.username}`}
