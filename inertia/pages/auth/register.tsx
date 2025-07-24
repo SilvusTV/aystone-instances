@@ -1,14 +1,19 @@
 import React from 'react'
 import { Head, useForm } from '@inertiajs/react'
 import Layout from '@/components/layout'
-import { PageProps } from '@/types'
+import { PageProps, Instance } from '@/types'
 
-export default function Register({ flash }: PageProps) {
+interface RegisterProps extends PageProps {
+  instances: Instance[]
+}
+
+export default function Register({ flash, instances = [] }: RegisterProps) {
   const { data, setData, post, processing, errors } = useForm({
     username: '',
     email: '',
     password: '',
     password_confirmation: '',
+    instance_id: '',
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -19,16 +24,16 @@ export default function Register({ flash }: PageProps) {
   return (
     <Layout>
       <Head title="Inscription" />
-      
+
       <div className="max-w-md mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-center">Inscription</h1>
-        
+
         {flash?.error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {flash.error}
           </div>
         )}
-        
+
         <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
@@ -52,7 +57,7 @@ export default function Register({ flash }: PageProps) {
                 Votre pseudo Minecraft exact, sensible à la casse.
               </p>
             </div>
-            
+
             <div className="mb-4">
               <label htmlFor="email" className="block mb-2">
                 Email <span className="text-gray-500">(facultatif)</span>
@@ -73,7 +78,34 @@ export default function Register({ flash }: PageProps) {
                 Recommandé pour récupérer votre compte en cas d'oubli du mot de passe.
               </p>
             </div>
-            
+
+            <div className="mb-4">
+              <label htmlFor="instance_id" className="block mb-2">
+                Instance <span className="text-gray-500">(facultatif)</span>
+              </label>
+              <select
+                id="instance_id"
+                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                  errors.instance_id ? 'border-red-500' : ''
+                }`}
+                value={data.instance_id}
+                onChange={(e) => setData('instance_id', e.target.value)}
+              >
+                <option value="">Aucune / Visiteur</option>
+                {instances.map((instance) => (
+                  <option key={instance.id} value={instance.id}>
+                    {instance.name} (ID: {instance.id})
+                  </option>
+                ))}
+              </select>
+              {errors.instance_id && (
+                <p className="text-red-500 text-sm mt-1">{errors.instance_id}</p>
+              )}
+              <p className="text-gray-500 text-sm mt-1">
+                Sélectionnez l'instance Minecraft à laquelle vous appartenez.
+              </p>
+            </div>
+
             <div className="mb-4">
               <label htmlFor="password" className="block mb-2">
                 Mot de passe <span className="text-red-500">*</span>
@@ -92,7 +124,7 @@ export default function Register({ flash }: PageProps) {
                 <p className="text-red-500 text-sm mt-1">{errors.password}</p>
               )}
             </div>
-            
+
             <div className="mb-6">
               <label htmlFor="password_confirmation" className="block mb-2">
                 Confirmer le mot de passe <span className="text-red-500">*</span>
@@ -111,7 +143,7 @@ export default function Register({ flash }: PageProps) {
                 <p className="text-red-500 text-sm mt-1">{errors.password_confirmation}</p>
               )}
             </div>
-            
+
             <div className="mb-6">
               <p className="text-gray-600 dark:text-gray-400 text-sm">
                 En vous inscrivant, votre compte sera créé avec le statut "invité". Un administrateur
@@ -120,7 +152,7 @@ export default function Register({ flash }: PageProps) {
                 plus d'informations.
               </p>
             </div>
-            
+
             <div>
               <button
                 type="submit"
@@ -131,7 +163,7 @@ export default function Register({ flash }: PageProps) {
               </button>
             </div>
           </form>
-          
+
           <div className="mt-4 text-center">
             <p>
               Déjà inscrit ?{' '}

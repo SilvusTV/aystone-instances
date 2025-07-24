@@ -138,15 +138,37 @@ export default function Dashboard({ auth = { user: null }, projects = [], flash 
             )}
           </div>
 
+          {auth.user?.role === 'instanceAdmin' && auth.user?.instanceId && (
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Administration d'instance</h2>
+              <div className="flex space-x-4">
+                <Link
+                  href={`/instances/${auth.user.instanceId}/description/edit`}
+                  className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded transition"
+                >
+                  Modifier la description de l'instance
+                </Link>
+              </div>
+            </div>
+          )}
+
           {auth.user?.role === 'admin' && (
             <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Administration</h2>
-              <Link
-                href="/admin/users"
-                className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded transition"
-              >
-                Gérer les utilisateurs
-              </Link>
+              <div className="flex space-x-4">
+                <Link
+                  href="/admin/users"
+                  className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded transition"
+                >
+                  Gérer les utilisateurs
+                </Link>
+                <Link
+                  href="/admin/instances"
+                  className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded transition"
+                >
+                  Gérer les instances
+                </Link>
+              </div>
             </div>
           )}
         </>

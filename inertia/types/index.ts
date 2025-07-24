@@ -2,12 +2,17 @@ export interface User {
   id: number
   username: string
   email: string | null
-  role: 'invité' | 'joueur' | 'admin'
+  role: 'invité' | 'joueur' | 'admin' | 'instanceAdmin'
+  instanceId?: number | null
+  instance?: Instance
+  createdAt: string
+  updatedAt: string | null
 }
 
 export interface Project {
   id: number
   userId: number
+  instanceId: number
   name: string
   description: string
   dimension: 'overworld' | 'nether' | 'end'
@@ -21,11 +26,32 @@ export interface Project {
   updatedAt: string | null
   user?: User
   tag?: Tag
+  instance?: Instance
 }
 
 export interface Tag {
   id: number
   label: string
+}
+
+export interface Instance {
+  id: number
+  name: string
+  createdAt: string
+  updatedAt: string | null
+  descriptions?: InstanceDescription[]
+  projects?: Project[]
+  users?: User[]
+}
+
+export interface InstanceDescription {
+  id: number
+  instanceId: number
+  title: string
+  content: string
+  createdAt: string
+  updatedAt: string | null
+  instance?: Instance
 }
 
 export interface PageProps {

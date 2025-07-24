@@ -14,7 +14,23 @@ export default function Layout({ children }: LayoutProps) {
   // Function to get CSRF token from cookie
   const getCsrfToken = () => {
     const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'))
-    return match ? decodeURIComponent(match[2]) : null
+    if (match) {
+      return decodeURIComponent(match[2])
+    }
+    // Fallback to look for the token in other possible cookie names
+    const altMatch = document.cookie.match(new RegExp('(^| )adonis-session=([^;]+)'))
+    return altMatch ? decodeURIComponent(altMatch[2]) : null
+  }
+
+  // Function to handle CSRF token errors
+  const handleCsrfError = (response) => {
+    if (response.status === 419 || 
+        (response.status === 500 && response.statusText.includes('CSRF'))) {
+      // Refresh the page to get a new CSRF token
+      window.location.reload()
+      return true
+    }
+    return false
   }
 
   // Load user's dark mode preference on component mount
@@ -26,8 +42,14 @@ export default function Layout({ children }: LayoutProps) {
           'X-XSRF-TOKEN': getCsrfToken() || '',
         },
       })
-        .then((response) => response.json())
+        .then((response) => {
+          if (handleCsrfError(response)) {
+            return null
+          }
+          return response.json()
+        })
         .then((data) => {
+          if (!data) return
           const isDarkMode = data.value === 'true'
           setDarkMode(isDarkMode)
           if (isDarkMode) {
@@ -36,8 +58,7 @@ export default function Layout({ children }: LayoutProps) {
             document.documentElement.classList.remove('dark')
           }
         })
-        .catch((error) => {
-          console.error('Error fetching dark mode preference:', error)
+        .catch(() => {
           // Default to light mode on error
           setDarkMode(false)
           document.documentElement.classList.remove('dark')
@@ -81,8 +102,16 @@ export default function Layout({ children }: LayoutProps) {
           key: 'darkMode',
           value: newDarkMode.toString(),
         }),
-      }).catch((error) => {
-        console.error('Error saving dark mode preference:', error)
+      })
+      .then(response => {
+        if (handleCsrfError(response)) {
+          return null
+        }
+        return response
+      })
+      .catch(() => {
+        // Silently fail - the preference will still be applied to the current session
+        // but won't be persisted for future sessions
       })
     } else {
       // If user is not logged in, save to localStorage
@@ -97,7 +126,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <div className="flex items-center">
               <Link href="/" className="text-2xl font-bold">
-                Aystone2-Dirt
+                Instances Aystone2
               </Link>
             </div>
 
@@ -108,17 +137,13 @@ export default function Layout({ children }: LayoutProps) {
               <Link href="/about" className="hover:text-primary-200 transition">
                 À propos
               </Link>
-              <a
-                href="https://maps.aystone.fr/dirt/"
-                target={'_blank'}
-                className="hover:text-primary-200 transition"
-              >
-                Map dynamique
-              </a>
+              <Link href="/instances" className="hover:text-primary-200 transition">
+                Instances
+              </Link>
 
               {auth.user ? (
                 <div className="flex items-center space-x-4">
-                  {['joueur', 'admin'].includes(auth.user.role) && (
+                  {['joueur', 'instanceAdmin', 'admin'].includes(auth.user.role) && (
                   <Link href="/dashboard" className="hover:text-primary-200 transition">
                     Mon profil
                   </Link>
@@ -172,9 +197,10 @@ export default function Layout({ children }: LayoutProps) {
         <footer className="bg-gray-100 dark:bg-gray-800 py-6">
           <div className="container mx-auto px-4 text-center">
             <p>
-              &copy; {new Date().getFullYear()} Aystone2 instance Dirt — Projet non affilié à
+              &copy; {new Date().getFullYear()} Instances Aystone2 — Projet non affilié à
               Mojang/Microsoft
             </p>
+            <p>Projet communautaire. N'est pas un produit officiel de Aystone ni de Aypierre</p>
             <p>Fait avec ❤️(Kaka) par Silvus_TV</p>
           </div>
         </footer>

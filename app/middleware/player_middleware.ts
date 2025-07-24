@@ -8,12 +8,16 @@ export default class PlayerMiddleware {
       return ctx.response.redirect('/login')
     }
 
-    // Check if user is a player or admin
-    if (ctx.auth.user!.role !== 'joueur' && ctx.auth.user!.role !== 'admin') {
+    // Check if user is a player, instanceAdmin, or admin
+    if (
+      ctx.auth.user!.role !== 'joueur' &&
+      ctx.auth.user!.role !== 'instanceAdmin' &&
+      ctx.auth.user!.role !== 'admin'
+    ) {
       return ctx.response.redirect('/')
     }
 
-    // User is a player or admin, proceed
+    // User is a player, instanceAdmin, or admin, proceed
     await next()
   }
 }

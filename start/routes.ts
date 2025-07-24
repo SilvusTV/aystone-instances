@@ -30,6 +30,53 @@ router
   })
   .middleware([middleware.silentAuth()])
 
+// Instances routes
+router
+  .get('/instances', async (ctx) => {
+    const { default: InstancesController } = await import('#controllers/instances_controller')
+    return new InstancesController().index(ctx)
+  })
+  .middleware([middleware.silentAuth()])
+router
+  .get('/instances/:id', async (ctx) => {
+    const { default: InstancesController } = await import('#controllers/instances_controller')
+    return new InstancesController().show(ctx)
+  })
+  .middleware([middleware.silentAuth()])
+router
+  .get('/instances/:id/projects', async (ctx) => {
+    const { default: InstancesController } = await import('#controllers/instances_controller')
+    return new InstancesController().projects(ctx)
+  })
+  .middleware([middleware.silentAuth()])
+router
+  .get('/instances/:id/description', async (ctx) => {
+    const { default: InstancesController } = await import('#controllers/instances_controller')
+    return new InstancesController().description(ctx)
+  })
+  .middleware([middleware.silentAuth()])
+
+// Instance description management routes (protected by instanceAdmin middleware)
+router
+  .get('/instances/:id/description/edit', async (ctx) => {
+    const { default: InstancesController } = await import('#controllers/instances_controller')
+    return new InstancesController().editDescription(ctx)
+  })
+  .middleware([middleware.auth(), middleware.instanceAdmin()])
+
+router
+  .post('/instances/:id/description', async (ctx) => {
+    const { default: InstancesController } = await import('#controllers/instances_controller')
+    return new InstancesController().updateDescription(ctx)
+  })
+  .middleware([middleware.auth(), middleware.instanceAdmin()])
+router
+  .get('/instances/:id/members', async (ctx) => {
+    const { default: InstancesController } = await import('#controllers/instances_controller')
+    return new InstancesController().members(ctx)
+  })
+  .middleware([middleware.silentAuth()])
+
 // Auth routes
 router
   .get('/login', async (ctx) => {
@@ -142,5 +189,33 @@ router
   .delete('/admin/users/:id', async (ctx) => {
     const { default: AdminController } = await import('#controllers/admin_controller')
     return new AdminController().deleteUser(ctx)
+  })
+  .middleware([middleware.auth(), middleware.admin()])
+
+router
+  .post('/admin/users/:id/reset-password', async (ctx) => {
+    const { default: AdminController } = await import('#controllers/admin_controller')
+    return new AdminController().resetPassword(ctx)
+  })
+  .middleware([middleware.auth(), middleware.admin()])
+
+router
+  .post('/admin/users/:id/instance', async (ctx) => {
+    const { default: AdminController } = await import('#controllers/admin_controller')
+    return new AdminController().updateUserInstance(ctx)
+  })
+  .middleware([middleware.auth(), middleware.admin()])
+
+router
+  .get('/admin/instances', async (ctx) => {
+    const { default: AdminController } = await import('#controllers/admin_controller')
+    return new AdminController().instances(ctx)
+  })
+  .middleware([middleware.auth(), middleware.admin()])
+
+router
+  .post('/admin/instances', async (ctx) => {
+    const { default: AdminController } = await import('#controllers/admin_controller')
+    return new AdminController().createInstance(ctx)
   })
   .middleware([middleware.auth(), middleware.admin()])

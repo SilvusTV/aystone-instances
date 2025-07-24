@@ -3,6 +3,7 @@ import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 import Tag from './tag.js'
+import Instance from './instance.js'
 
 export default class Project extends BaseModel {
   @column({ isPrimary: true })
@@ -10,6 +11,9 @@ export default class Project extends BaseModel {
 
   @column()
   declare userId: number
+
+  @column()
+  declare instanceId: number
 
   @column()
   declare name: string
@@ -49,4 +53,7 @@ export default class Project extends BaseModel {
 
   @belongsTo(() => Tag)
   declare tag: BelongsTo<typeof Tag>
+
+  @belongsTo(() => Instance)
+  declare instance: BelongsTo<typeof Instance>
 }

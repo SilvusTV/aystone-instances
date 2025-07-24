@@ -1,4 +1,3 @@
-import React from 'react'
 import { Head } from '@inertiajs/react'
 import Layout from '@/components/layout'
 
@@ -11,21 +10,14 @@ export default function About() {
         <h1 className="text-3xl font-bold mb-6">À propos d'Aystone2-Dirt</h1>
         
         <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Présentation de l'instance Dirt</h2>
-          <p className="mb-4">
-            L'instance <s>KAKA</s> Dirt du server Aystone2 ...
-          </p>
-        </div>
-        
-        <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
           <h2 className="text-2xl font-semibold mb-4">À quoi sert ce site ?</h2>
           <p className="mb-4">
             Ce site communautaire a été créé pour permettre aux joueurs de l'instance Dirt de partager
             et de documenter leurs projets de construction.
           </p>
           <p className="mb-4">
-            En tant que visiteur, vous pouvez parcourir tous les projets en cours et terminés, filtrer par dimension
-            ou par type de projet, et découvrir les créations impressionnantes de notre communauté.
+            En tant que visiteur, vous pouvez parcourir tous les projets en cours et terminés, filtrer par dimension,
+            par type de projet ou par instance, et découvrir les créations impressionnantes de notre communauté.
           </p>
           <p>
             En tant que joueur inscrit, vous pouvez créer et gérer vos propres projets, en fournissant des détails
