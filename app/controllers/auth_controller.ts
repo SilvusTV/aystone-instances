@@ -2,6 +2,11 @@ import User from '#models/user'
 import Instance from '#models/instance'
 import { HttpContext } from '@adonisjs/core/http'
 import hash from '@adonisjs/core/services/hash'
+import { DateTime } from 'luxon'
+import { randomBytes } from 'node:crypto'
+import mail from '@adonisjs/mail/services/main'
+import PasswordResetMail from '#mails/password_reset_mail'
+import env from '#start/env'
 
 export default class AuthController {
   async showLogin({ inertia }: HttpContext) {
@@ -107,5 +112,118 @@ export default class AuthController {
   async logout({ auth, response }: HttpContext) {
     await auth.use('web').logout()
     return response.redirect('/')
+  }
+
+  async showForgotPassword({ inertia }: HttpContext) {
+    return inertia.render('auth/forgot-password')
+  }
+
+  async forgotPassword({ request, response, session }: HttpContext) {
+    const { email } = request.only(['email'])
+
+    // Find the user by email (case-insensitive)
+    const user = await User.query()
+      .whereRaw('LOWER(email) = ?', [email.toLowerCase()])
+      .first()
+
+    // If no user found, show generic success message for security
+    if (!user) {
+      session.flash('success', 'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.')
+      return response.redirect().back()
+    }
+
+    // Generate a random token
+    const resetToken = randomBytes(32).toString('hex')
+
+    // Set token expiration (1 hour from now)
+    const resetTokenExpiresAt = DateTime.now().plus({ hours: 1 })
+
+    // Save token to user
+    user.resetToken = resetToken
+    user.resetTokenExpiresAt = resetTokenExpiresAt
+    await user.save()
+
+    // Generate reset URL
+    const appUrl = env.get('APP_URL', `http://${env.get('HOST')}:${env.get('PORT')}`)
+    const resetUrl = `${appUrl}/reset-password?token=${resetToken}`
+
+    // Send email
+    await mail.send(new PasswordResetMail(user.username, resetToken, resetUrl, user.email!))
+
+    session.flash('success', 'Un email de réinitialisation a été envoyé à votre adresse email.')
+    return response.redirect().back()
+  }
+
+  async showResetPassword({ inertia, request, response, session }: HttpContext) {
+    try {
+      // Get token from query string
+      const { token } = request.qs()
+      console.log('Received reset password request with token:', token)
+
+      if (!token) {
+        console.log('Token missing in request')
+        session.flash('error', 'Token de réinitialisation manquant.')
+        return response.redirect('/forgot-password')
+      }
+
+      // Find user with this token
+      const user = await User.query()
+        .where('reset_token', token)
+        .first()
+
+      console.log('User found with token:', user ? 'Yes' : 'No')
+
+      // For debugging, let's render the page even if the token is invalid
+      // This will help us determine if the issue is with token validation or page rendering
+      return inertia.render('auth/reset-password', { token })
+    } catch (error) {
+      console.error('Error in showResetPassword:', error)
+      session.flash('error', 'Une erreur est survenue lors du traitement de votre demande.')
+      return response.redirect('/forgot-password')
+    }
+  }
+
+  async resetPassword({ request, response, session }: HttpContext) {
+    const { token, password, passwordConfirmation } = request.only([
+      'token',
+      'password',
+      'password_confirmation',
+    ])
+
+    // Validate data
+    if (!token) {
+      session.flash('error', 'Token de réinitialisation manquant.')
+      return response.redirect('/forgot-password')
+    }
+
+    if (password !== passwordConfirmation) {
+      session.flash('error', 'Les mots de passe ne correspondent pas.')
+      return response.redirect().withQs().back()
+    }
+
+    if (password.length < 6) {
+      session.flash('error', 'Le mot de passe doit contenir au moins 6 caractères.')
+      return response.redirect().withQs().back()
+    }
+
+    // Find user with this token
+    const user = await User.query()
+      .where('reset_token', token)
+      .first()
+
+    // If no user found or token expired, redirect to forgot password
+    if (!user || !user.resetTokenExpiresAt || user.resetTokenExpiresAt < DateTime.now()) {
+      session.flash('error', 'Le lien de réinitialisation est invalide ou a expiré.')
+      return response.redirect('/forgot-password')
+    }
+
+    // Update password
+    user.password = await hash.use('scrypt').make(password)
+    user.resetToken = null
+    user.resetTokenExpiresAt = null
+    await user.save()
+
+    session.flash('success', 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.')
+    return response.redirect('/login')
   }
 }

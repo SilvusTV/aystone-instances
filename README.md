@@ -4,7 +4,7 @@ Site communautaire pour les joueurs de l'instance "dirt" du serveur Minecraft Ay
 
 ## Description
 
-Ce site permet aux joueurs de l'instance Aystone2-Dirt de partager et documenter leurs projets de construction. Les visiteurs peuvent parcourir les projets en cours et terminés, tandis que les joueurs authentifiés peuvent créer et gérer leurs propres projets.
+Ce site permet aux joueurs des différentes instances d'Aystone2 de partager et documenter leurs projets de construction. Les visiteurs peuvent parcourir les projets en cours et terminés, tandis que les joueurs authentifiés peuvent créer et gérer leurs propres projets.
 
 ## Fonctionnalités
 

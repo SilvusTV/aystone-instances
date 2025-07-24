@@ -8,9 +8,7 @@ export default class ProjectsController {
     const dimension = request.input('dimension', 'all')
     const tagId = request.input('tag_id', 'all')
 
-    let query = Project.query()
-      .preload('user')
-      .preload('tag')
+    let query = Project.query().preload('user').preload('tag')
 
     if (status !== 'all') {
       query = query.where('status', status)
@@ -27,10 +25,10 @@ export default class ProjectsController {
     const projects = await query.exec()
     const tags = await Tag.all()
 
-    return inertia.render('projects/index', { 
-      projects, 
-      tags, 
-      filters: { status, dimension, tagId } 
+    return inertia.render('projects/index', {
+      projects,
+      tags,
+      filters: { status, dimension, tagId },
     })
   }
 
@@ -42,18 +40,19 @@ export default class ProjectsController {
   async store({ request, response, auth }: HttpContext) {
     const user = auth.user!
     const data = request.only([
-      'name', 
-      'description', 
-      'dimension', 
-      'x', 
-      'y', 
-      'z', 
-      'tag_id', 
-      'dynmap_url'
+      'name',
+      'description',
+      'dimension',
+      'x',
+      'y',
+      'z',
+      'tag_id',
+      'dynmap_url',
     ])
 
     await Project.create({
       userId: user.id,
+      instanceId: user.instanceId,
       name: data.name,
       description: data.description,
       dimension: data.dimension,
@@ -62,7 +61,7 @@ export default class ProjectsController {
       z: data.z,
       tagId: data.tag_id,
       dynmapUrl: data.dynmap_url || null,
-      status: 'en_cours'
+      status: 'en_cours',
     })
 
     return response.redirect('/dashboard')
@@ -70,7 +69,7 @@ export default class ProjectsController {
 
   async edit({ inertia, params, auth, response }: HttpContext) {
     const project = await Project.find(params.id)
-    
+
     if (!project) {
       return response.redirect('/dashboard')
     }
@@ -81,13 +80,13 @@ export default class ProjectsController {
     }
 
     const tags = await Tag.all()
-    
+
     return inertia.render('projects/edit', { project, tags })
   }
 
   async update({ params, request, response, auth }: HttpContext) {
     const project = await Project.find(params.id)
-    
+
     if (!project) {
       return response.redirect('/dashboard')
     }
@@ -98,15 +97,15 @@ export default class ProjectsController {
     }
 
     const data = request.only([
-      'name', 
-      'description', 
-      'dimension', 
-      'x', 
-      'y', 
-      'z', 
-      'tag_id', 
+      'name',
+      'description',
+      'dimension',
+      'x',
+      'y',
+      'z',
+      'tag_id',
       'dynmap_url',
-      'status'
+      'status',
     ])
 
     project.name = data.name
@@ -126,7 +125,7 @@ export default class ProjectsController {
 
   async destroy({ params, response, auth }: HttpContext) {
     const project = await Project.find(params.id)
-    
+
     if (!project) {
       return response.redirect('/dashboard')
     }
@@ -143,7 +142,7 @@ export default class ProjectsController {
 
   async dashboard({ inertia, auth }: HttpContext) {
     const user = auth.user!
-    
+
     await user.load('projects', (query) => {
       query.preload('tag')
     })

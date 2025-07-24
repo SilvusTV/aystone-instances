@@ -1,16 +1,16 @@
 import { HttpContext } from '@adonisjs/core/http'
 import Project from '#models/project'
 import Tag from '#models/tag'
+import Instance from '#models/instance'
 
 export default class PagesController {
   async home({ inertia, request }: HttpContext) {
     const status = request.input('status', 'all')
     const dimension = request.input('dimension', 'all')
     const tagId = request.input('tag_id', 'all')
+    const instanceId = request.input('instance_id', 'all')
 
-    let query = Project.query()
-      .preload('user')
-      .preload('tag')
+    let query = Project.query().preload('user').preload('tag').preload('instance')
 
     if (status !== 'all') {
       query = query.where('status', status)
@@ -24,10 +24,15 @@ export default class PagesController {
       query = query.where('tag_id', tagId)
     }
 
+    if (instanceId !== 'all') {
+      query = query.where('instance_id', instanceId)
+    }
+
     const projects = await query.exec()
     const tags = await Tag.all()
+    const instances = await Instance.all()
 
-    return inertia.render('home_new', { projects, tags })
+    return inertia.render('home_new', { projects, tags, instances })
   }
 
   async about({ inertia }: HttpContext) {

@@ -10,6 +10,7 @@ export default function Layout({ children }: LayoutProps) {
   const { auth = { user: null } } = usePage<PageProps>().props
   const [darkMode, setDarkMode] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   // Function to get CSRF token from cookie
   const getCsrfToken = () => {
@@ -80,6 +81,29 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [auth.user])
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isDropdownOpen) {
+        const dropdown = document.getElementById('user-dropdown')
+        const dropdownButton = document.getElementById('user-dropdown-button')
+        if (
+          dropdown && 
+          dropdownButton && 
+          !dropdown.contains(event.target) && 
+          !dropdownButton.contains(event.target)
+        ) {
+          setIsDropdownOpen(false)
+        }
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isDropdownOpen])
+
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode
     setDarkMode(newDarkMode)
@@ -145,25 +169,53 @@ export default function Layout({ children }: LayoutProps) {
                 <div className="flex items-center space-x-4">
                   {['joueur', 'instanceAdmin', 'admin'].includes(auth.user.role) && (
                   <Link href="/dashboard" className="hover:text-primary-200 transition">
-                    Mon profil
+                    Tableau de bord
                   </Link>
+                  )}
+                  <div className="relative">
+                    <div 
+                      id="user-dropdown-button"
+                      className="flex items-center space-x-2 cursor-pointer hover:text-primary-200 transition"
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    >
+                      <img
+                        src={`https://mineskin.eu/helm/${auth.user.username}`}
+                        alt={auth.user.username}
+                        className="w-8 h-8 rounded"
+                      />
+                      <span>{auth.user.username}</span>
+                      <svg 
+                        className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24" 
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </div>
+
+                    {isDropdownOpen && (
+                      <div id="user-dropdown" className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10">
+                        <Link 
+                          href="/profile" 
+                          className="block px-4 py-2 text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          Mon profil
+                        </Link>
+                        <Link
+                          href="/logout"
+                          method="post"
+                          as="button"
+                          className="block w-full text-left px-4 py-2 text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          Déconnexion
+                        </Link>
+                      </div>
                     )}
-                  <div className="flex items-center space-x-2">
-                    <img
-                      src={`https://mineskin.eu/helm/${auth.user.username}`}
-                      alt={auth.user.username}
-                      className="w-8 h-8 rounded"
-                    />
-                    <span>{auth.user.username}</span>
                   </div>
-                  <Link
-                    href="/logout"
-                    method="post"
-                    as="button"
-                    className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-white transition"
-                  >
-                    Déconnexion
-                  </Link>
                 </div>
               ) : (
                 <div className="flex items-center space-x-4">

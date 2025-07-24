@@ -109,6 +109,70 @@ router
   })
   .middleware([middleware.auth()])
 
+// Password reset routes
+router
+  .get('/forgot-password', async (ctx) => {
+    const { default: AuthController } = await import('#controllers/auth_controller')
+    return new AuthController().showForgotPassword(ctx)
+  })
+  .middleware([middleware.guest()])
+
+router
+  .post('/forgot-password', async (ctx) => {
+    const { default: AuthController } = await import('#controllers/auth_controller')
+    return new AuthController().forgotPassword(ctx)
+  })
+  .middleware([middleware.guest()])
+
+// Route for password reset page
+router
+  .get('/reset-password', async (ctx) => {
+    console.log('Reset password route hit with query:', ctx.request.qs())
+    const { default: AuthController } = await import('#controllers/auth_controller')
+    return new AuthController().showResetPassword(ctx)
+  })
+  // No middleware for debugging purposes
+  // .middleware([middleware.guest()])
+
+router
+  .post('/reset-password', async (ctx) => {
+    const { default: AuthController } = await import('#controllers/auth_controller')
+    return new AuthController().resetPassword(ctx)
+  })
+  .middleware([middleware.guest()])
+
+// Profile routes (accessible only to authenticated users)
+router
+  .get('/profile', async (ctx) => {
+    const { default: ProfileController } = await import('#controllers/profile_controller')
+    return new ProfileController().show(ctx)
+  })
+  .middleware([middleware.auth()])
+router
+  .post('/profile/email', async (ctx) => {
+    const { default: ProfileController } = await import('#controllers/profile_controller')
+    return new ProfileController().updateEmail(ctx)
+  })
+  .middleware([middleware.auth()])
+router
+  .post('/profile/password', async (ctx) => {
+    const { default: ProfileController } = await import('#controllers/profile_controller')
+    return new ProfileController().updatePassword(ctx)
+  })
+  .middleware([middleware.auth()])
+router
+  .delete('/profile/delete', async (ctx) => {
+    const { default: ProfileController } = await import('#controllers/profile_controller')
+    return new ProfileController().deleteAccount(ctx)
+  })
+  .middleware([middleware.auth()])
+
+// Test route for debugging
+router
+  .get('/test-reset', async (ctx) => {
+    return ctx.inertia.render('test-reset')
+  })
+
 // Projects routes (public)
 router
   .get('/projects', async (ctx) => {

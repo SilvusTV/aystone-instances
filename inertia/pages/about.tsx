@@ -7,7 +7,7 @@ export default function About() {
       <Head title="À propos" />
       
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">À propos d'Aystone2-Dirt</h1>
+        <h1 className="text-3xl font-bold mb-6">À propos des instances d'Aystone2</h1>
         
         <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
           <h2 className="text-2xl font-semibold mb-4">À quoi sert ce site ?</h2>
@@ -38,7 +38,7 @@ export default function About() {
           <div className="mb-6">
             <h3 className="text-xl font-medium mb-2">Étape 2: Validation de votre compte</h3>
             <p>
-              Quand vous vous inscrivez et que vous faites partie de l'instance Dirt, Faites moi un /msg sur le serveur afin de valider votre présence sur l'instance.
+              Quand vous vous inscrivez, pinguez moi (@Silvus_tv) sur Discord, depuis le channel textuel de votre instance pour que je puisse valider votre compte.
               Si cette action n'est pas faite, vous resterez spectateur.
             </p>
           </div>
