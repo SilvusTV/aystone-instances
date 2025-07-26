@@ -159,7 +159,7 @@ export default class AuthController {
   }
 
   async resetPassword({ request, response, session }: HttpContext) {
-    const { token, password, passwordConfirmation } = request.only([
+    const { token, password, password_confirmation: passwordConfirmation } = request.only([
       'token',
       'password',
       'password_confirmation',
@@ -189,7 +189,7 @@ export default class AuthController {
       return response.redirect('/forgot-password')
     }
 
-    user.password = await hash.make(password)
+    user.password = password // Let the AuthFinder mixin handle the hashing
     user.resetToken = null
     user.resetTokenExpiresAt = null
     await user.save()
