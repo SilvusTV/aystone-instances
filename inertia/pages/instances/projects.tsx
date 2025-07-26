@@ -21,7 +21,7 @@ export default function InstanceProjects({ instance, projects = [] }: InstancePr
   return (
     <Layout>
       <Head title={`Projets - ${instance.name}`} />
-      
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Projets de l'instance: {instance.name}</h1>
         <div className="flex space-x-2 mb-4">
@@ -58,6 +58,12 @@ export default function InstanceProjects({ instance, projects = [] }: InstancePr
           >
             Membres
           </Link>
+          <Link
+            href={`/instances/${instance.id}/dynmap`}
+            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+          >
+            DynMap
+          </Link>
         </nav>
       </div>
 
@@ -76,7 +82,7 @@ export default function InstanceProjects({ instance, projects = [] }: InstancePr
               <option value="termine">Terminé</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block mb-2">Dimension</label>
             <select 
@@ -103,14 +109,14 @@ export default function InstanceProjects({ instance, projects = [] }: InstancePr
                   Par {project.user?.username} • {project.dimension} • {project.tag?.label}
                 </p>
               </div>
-              
+
               <div className="p-4">
                 <p className="mb-4">{project.description.substring(0, 100)}...</p>
-                
+
                 <div className="mb-4">
                   <span className="font-semibold">Coordonnées:</span> X: {project.x}, Y: {project.y}, Z: {project.z}
                 </div>
-                
+
                 <div className="flex justify-between items-center">
                   <span className={`px-2 py-1 rounded text-sm ${
                     project.status === 'en_cours' 
@@ -119,7 +125,7 @@ export default function InstanceProjects({ instance, projects = [] }: InstancePr
                   }`}>
                     {project.status === 'en_cours' ? 'En cours' : 'Terminé'}
                   </span>
-                  
+
                   {project.dynmapUrl && (
                     <a 
                       href={project.dynmapUrl} 

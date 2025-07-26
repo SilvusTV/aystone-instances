@@ -1,20 +1,23 @@
 import React from 'react'
 import { Head, Link } from '@inertiajs/react'
 import Layout from '@/components/layout'
-import { Instance } from '@/types'
+import { Instance, PageProps } from '@/types'
 
-interface InstanceShowProps {
+interface InstanceDynMapPageProps extends PageProps {
   instance: Instance
 }
 
-export default function InstanceShow({ instance }: InstanceShowProps) {
+export default function InstanceDynMapPage({ instance, auth }: InstanceDynMapPageProps) {
+  // Create the map URL with lowercase instance name
+  const mapUrl = `https://maps.aystone.fr/${instance.name.toLowerCase()}`
+
   return (
     <Layout>
-      <Head title={`Instance ${instance.name}`} />
+      <Head title={`DynMap - ${instance.name}`} />
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Instance: {instance.name}</h1>
-        <div className="flex space-x-2 mb-4">
+        <h1 className="text-3xl font-bold mb-4">DynMap de l'instance: {instance.name}</h1>
+        <div className="flex justify-between items-center mb-4">
           <Link href="/instances" className="text-primary-600 hover:text-primary-800 dark:text-primary-400">
             &larr; Retour aux instances
           </Link>
@@ -26,7 +29,7 @@ export default function InstanceShow({ instance }: InstanceShowProps) {
         <nav className="flex flex-wrap gap-4">
           <Link
             href={`/instances/${instance.id}`}
-            className="px-4 py-2 rounded bg-primary-500 text-white hover:bg-primary-600 transition"
+            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
           >
             Aperçu
           </Link>
@@ -50,7 +53,7 @@ export default function InstanceShow({ instance }: InstanceShowProps) {
           </Link>
           <Link
             href={`/instances/${instance.id}/dynmap`}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+            className="px-4 py-2 rounded bg-primary-500 text-white hover:bg-primary-600 transition"
           >
             DynMap
           </Link>
@@ -58,11 +61,27 @@ export default function InstanceShow({ instance }: InstanceShowProps) {
       </div>
 
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4">À propos de cette instance</h2>
-        <p className="mb-4">
-          Bienvenue sur la page de l'instance {instance.name}. Utilisez la navigation ci-dessus pour explorer les projets, 
-          la description détaillée et les membres de cette instance.
-        </p>
+        <h2 className="text-2xl font-bold mb-4">Carte dynamique de l'instance</h2>
+        
+        <div className="mb-6">
+          <a 
+            href={mapUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="bg-primary-600 hover:bg-primary-700 text-white py-2 px-4 rounded transition inline-block"
+          >
+            Ouvrir la carte dans un nouvel onglet
+          </a>
+        </div>
+        
+        <div className="w-full aspect-video">
+          <iframe 
+            src={mapUrl} 
+            className="w-full h-full border-0 rounded-lg"
+            title={`DynMap de ${instance.name}`}
+            allowFullScreen
+          ></iframe>
+        </div>
       </div>
     </Layout>
   )

@@ -77,4 +77,9 @@ export default class InstancesController {
 
     return inertia.render('instances/members', { instance, members })
   }
+
+  async dynmap({ inertia, params }: HttpContext) {
+    const instance = await Instance.findOrFail(params.id)
+    return inertia.render('instances/dynmap', { instance })
+  }
 }

@@ -76,6 +76,12 @@ router
     return new InstancesController().members(ctx)
   })
   .middleware([middleware.silentAuth()])
+router
+  .get('/instances/:id/dynmap', async (ctx) => {
+    const { default: InstancesController } = await import('#controllers/instances_controller')
+    return new InstancesController().dynmap(ctx)
+  })
+  .middleware([middleware.silentAuth()])
 
 // Auth routes
 router

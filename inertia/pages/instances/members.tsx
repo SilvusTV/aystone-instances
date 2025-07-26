@@ -12,7 +12,7 @@ export default function InstanceMembers({ instance, members = [] }: InstanceMemb
   return (
     <Layout>
       <Head title={`Membres - ${instance.name}`} />
-      
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Membres de l'instance: {instance.name}</h1>
         <div className="flex space-x-2 mb-4">
@@ -49,12 +49,18 @@ export default function InstanceMembers({ instance, members = [] }: InstanceMemb
           >
             Membres
           </Link>
+          <Link
+            href={`/instances/${instance.id}/dynmap`}
+            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+          >
+            DynMap
+          </Link>
         </nav>
       </div>
 
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-6">Liste des membres</h2>
-        
+
         {members.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {members.map(member => (
