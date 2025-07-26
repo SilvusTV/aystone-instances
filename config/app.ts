@@ -26,6 +26,11 @@ export const http = defineConfig({
   useAsyncLocalStorage: false,
 
   /**
+   * Trust proxy configuration for applications behind a reverse proxy
+   */
+  trustProxy: app.inProduction,
+
+  /**
    * Manage cookies configuration. The settings for the session id cookie are
    * defined inside the "config/session.ts" file.
    */
