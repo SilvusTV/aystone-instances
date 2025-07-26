@@ -151,7 +151,7 @@ export default function AdminInstances({ instances = [], flash }: AdminInstances
                       </label>
                     </div>
                     <Link
-                      href={`/instances/${instance.id}`}
+                      href={`/instances/${instance.name}`}
                       className="text-primary-600 hover:text-primary-800 dark:text-primary-400"
                     >
                       Voir

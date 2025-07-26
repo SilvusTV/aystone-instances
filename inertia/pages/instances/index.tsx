@@ -43,7 +43,7 @@ export default function InstancesIndex({ instances = [] }: InstancesIndexProps) 
                 </div>
                 <div className="flex justify-center mt-4">
                   <Link
-                    href={`/instances/${instance.id}`}
+                    href={`/instances/${instance.name}`}
                     className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded transition"
                   >
                     Voir les détails

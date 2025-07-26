@@ -38,19 +38,19 @@ router
   })
   .middleware([middleware.silentAuth()])
 router
-  .get('/instances/:id', async (ctx) => {
+  .get('/instances/:name', async (ctx) => {
     const { default: InstancesController } = await import('#controllers/instances_controller')
     return new InstancesController().show(ctx)
   })
   .middleware([middleware.silentAuth()])
 router
-  .get('/instances/:id/projects', async (ctx) => {
+  .get('/instances/:name/projects', async (ctx) => {
     const { default: InstancesController } = await import('#controllers/instances_controller')
     return new InstancesController().projects(ctx)
   })
   .middleware([middleware.silentAuth()])
 router
-  .get('/instances/:id/description', async (ctx) => {
+  .get('/instances/:name/description', async (ctx) => {
     const { default: InstancesController } = await import('#controllers/instances_controller')
     return new InstancesController().description(ctx)
   })
@@ -58,26 +58,26 @@ router
 
 // Instance description management routes (protected by instanceAdmin middleware)
 router
-  .get('/instances/:id/description/edit', async (ctx) => {
+  .get('/instances/:name/description/edit', async (ctx) => {
     const { default: InstancesController } = await import('#controllers/instances_controller')
     return new InstancesController().editDescription(ctx)
   })
   .middleware([middleware.auth(), middleware.instanceAdmin()])
 
 router
-  .post('/instances/:id/description', async (ctx) => {
+  .post('/instances/:name/description', async (ctx) => {
     const { default: InstancesController } = await import('#controllers/instances_controller')
     return new InstancesController().updateDescription(ctx)
   })
   .middleware([middleware.auth(), middleware.instanceAdmin()])
 router
-  .get('/instances/:id/members', async (ctx) => {
+  .get('/instances/:name/members', async (ctx) => {
     const { default: InstancesController } = await import('#controllers/instances_controller')
     return new InstancesController().members(ctx)
   })
   .middleware([middleware.silentAuth()])
 router
-  .get('/instances/:id/dynmap', async (ctx) => {
+  .get('/instances/:name/dynmap', async (ctx) => {
     const { default: InstancesController } = await import('#controllers/instances_controller')
     return new InstancesController().dynmap(ctx)
   })

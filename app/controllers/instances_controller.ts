@@ -11,12 +11,12 @@ export default class InstancesController {
   }
 
   async show({ inertia, params }: HttpContext) {
-    const instance = await Instance.findOrFail(params.id)
+    const instance = await Instance.findByOrFail('name', params.name)
     return inertia.render('instances/show', { instance })
   }
 
   async projects({ inertia, params }: HttpContext) {
-    const instance = await Instance.findOrFail(params.id)
+    const instance = await Instance.findByOrFail('name', params.name)
     const projects = await Project.query()
       .where('instance_id', instance.id)
       .preload('user')
@@ -27,7 +27,7 @@ export default class InstancesController {
   }
 
   async description({ inertia, params, auth }: HttpContext) {
-    const instance = await Instance.findOrFail(params.id)
+    const instance = await Instance.findByOrFail('name', params.name)
     await instance.load('descriptions')
 
     // Auth is automatically passed to the view by the inertia middleware
@@ -35,7 +35,7 @@ export default class InstancesController {
   }
 
   async editDescription({ inertia, params, auth }: HttpContext) {
-    const instance = await Instance.findOrFail(params.id)
+    const instance = await Instance.findByOrFail('name', params.name)
     await instance.load('descriptions')
 
     // Check if user is an instance admin for this instance or a global admin
@@ -47,7 +47,7 @@ export default class InstancesController {
   }
 
   async updateDescription({ params, request, response, session }: HttpContext) {
-    const instance = await Instance.findOrFail(params.id)
+    const instance = await Instance.findByOrFail('name', params.name)
     const { title, content } = request.only(['title', 'content'])
 
     try {
@@ -59,7 +59,7 @@ export default class InstancesController {
       })
 
       session.flash('success', 'Description mise à jour avec succès')
-      return response.redirect(`/instances/${instance.id}/description`)
+      return response.redirect(`/instances/${instance.name}/description`)
     } catch (error) {
       console.error('Error updating instance description:', error)
       session.flash('error', 'Erreur lors de la mise à jour de la description')
@@ -68,7 +68,7 @@ export default class InstancesController {
   }
 
   async members({ inertia, params }: HttpContext) {
-    const instance = await Instance.findOrFail(params.id)
+    const instance = await Instance.findByOrFail('name', params.name)
     const projects = await Project.query().where('instance_id', instance.id).preload('user').exec()
 
     // Get unique users from projects
@@ -79,7 +79,7 @@ export default class InstancesController {
   }
 
   async dynmap({ inertia, params }: HttpContext) {
-    const instance = await Instance.findOrFail(params.id)
+    const instance = await Instance.findByOrFail('name', params.name)
     return inertia.render('instances/dynmap', { instance })
   }
 }

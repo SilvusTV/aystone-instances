@@ -28,31 +28,31 @@ export default function InstanceDynMapPage({ instance, auth }: InstanceDynMapPag
       <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-6">
         <nav className="flex flex-wrap gap-4">
           <Link
-            href={`/instances/${instance.id}`}
+            href={`/instances/${instance.name}`}
             className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
           >
             Aperçu
           </Link>
           <Link
-            href={`/instances/${instance.id}/projects`}
+            href={`/instances/${instance.name}/projects`}
             className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
           >
             Projets
           </Link>
           <Link
-            href={`/instances/${instance.id}/description`}
+            href={`/instances/${instance.name}/description`}
             className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
           >
             Description
           </Link>
           <Link
-            href={`/instances/${instance.id}/members`}
+            href={`/instances/${instance.name}/members`}
             className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
           >
             Membres
           </Link>
           <Link
-            href={`/instances/${instance.id}/dynmap`}
+            href={`/instances/${instance.name}/dynmap`}
             className="px-4 py-2 rounded bg-primary-500 text-white hover:bg-primary-600 transition"
           >
             DynMap
@@ -62,7 +62,7 @@ export default function InstanceDynMapPage({ instance, auth }: InstanceDynMapPag
 
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-4">Carte dynamique de l'instance</h2>
-        
+
         <div className="mb-6">
           <a 
             href={mapUrl} 
@@ -73,7 +73,7 @@ export default function InstanceDynMapPage({ instance, auth }: InstanceDynMapPag
             Ouvrir la carte dans un nouvel onglet
           </a>
         </div>
-        
+
         <div className="w-full aspect-video">
           <iframe 
             src={mapUrl} 
