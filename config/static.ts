@@ -13,8 +13,10 @@ const staticServerConfig = defineConfig({
   lastModified: true,
   dotFiles: 'ignore',
   // Add resources directory as a static files source
+  // Ensure uploads directory is properly mapped for static file serving
   mappings: {
     '/resources': 'resources',
+    '/resources/uploads': 'resources/uploads',
   },
 })
 
