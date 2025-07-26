@@ -10,14 +10,6 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
 
-// Health check route for Docker
-router.get('/health', async ({ response }) => {
-  return response.status(200).json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-  })
-})
-
 // Public routes
 router
   .get('/', async (ctx) => {

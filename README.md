@@ -51,58 +51,28 @@ Ce site permet aux joueurs des différentes instances d'Aystone2 de partager et 
 
 1. Assurez-vous que votre domaine (instances-aystone.silvus.me) pointe vers votre serveur.
 
-2. Créez un fichier `.env.production` pour les variables d'environnement de production (sans informations sensibles) :
-   ```bash
-   cp .env.example .env.production
-   ```
-   Modifiez ce fichier pour configurer votre environnement de production.
-
-3. Créez les répertoires nécessaires pour les certificats SSL :
+2. Créez les répertoires nécessaires pour les certificats SSL :
    ```bash
    mkdir -p certs html vhost.d
    ```
 
-4. Démarrez les conteneurs avec Docker Compose en utilisant le fichier de configuration de production :
+3. Démarrez les conteneurs avec Docker Compose en utilisant le fichier de configuration de production :
    ```bash
    docker-compose -f compose-production.yml up -d
    ```
 
-5. Le service Let's Encrypt obtiendra automatiquement un certificat SSL pour votre domaine et configurera HTTPS.
+4. Le service Let's Encrypt obtiendra automatiquement un certificat SSL pour votre domaine et configurera HTTPS.
 
-6. Accédez à l'application dans votre navigateur :
+5. Accédez à l'application dans votre navigateur :
    ```
    https://instances-aystone.silvus.me
    ```
-
-7. Vérifiez que l'application fonctionne correctement en testant le point de terminaison de santé :
-   ```bash
-   curl https://instances-aystone.silvus.me/health
-   ```
-   Vous devriez recevoir une réponse JSON indiquant que le service est en bonne santé.
 
 Note : Si vous rencontrez des problèmes avec HTTPS, vérifiez les logs des conteneurs :
    ```bash
    docker logs nginx-proxy
    docker logs nginx-letsencrypt
-   docker logs adonis-app
    ```
-
-### Améliorations de la configuration de production
-
-La configuration de production a été optimisée pour améliorer la sécurité, la fiabilité et les performances :
-
-1. **Vérifications de santé** : Des vérifications de santé ont été ajoutées pour tous les services, permettant à Docker de surveiller l'état de l'application et de redémarrer automatiquement les services défaillants.
-
-2. **Dépendances des services** : Les services démarrent dans le bon ordre, avec des conditions de dépendance basées sur l'état de santé.
-
-3. **Sécurité améliorée** :
-   - Utilisation de Node.js 20 (LTS) au lieu de versions plus récentes et potentiellement instables
-   - Montage des volumes en lecture seule lorsque possible
-   - Installation des dépendances de production uniquement dans l'image finale
-
-4. **Optimisation des performances** :
-   - Utilisation d'images Alpine pour réduire la taille des conteneurs
-   - Configuration optimisée pour Nginx et Node.js
 
 ## Accès à la base de données à distance
 

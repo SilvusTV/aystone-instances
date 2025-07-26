@@ -7,30 +7,21 @@ services:
       dockerfile: ./docker/Dockerfile-prod
     container_name: adonis-app
     environment:
-      - NODE_ENV=production
       - VIRTUAL_HOST=instances-aystone.silvus.me
       - LETSENCRYPT_HOST=instances-aystone.silvus.me
       - LETSENCRYPT_EMAIL=instancesAY2-noreply@silvus.me
       - VIRTUAL_PORT=80
-    # No need to mount the entire project directory in production
-    # Only mount configuration files if needed
     volumes:
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./:/app
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     expose:
       - "80"
       - "3333"
     networks:
       - nginx-network
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     restart: always
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3333/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
   nginx-proxy:
     image: nginxproxy/nginx-proxy:alpine
@@ -46,11 +37,6 @@ services:
     networks:
       - nginx-network
     restart: always
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   letsencrypt:
     image: nginxproxy/acme-companion
@@ -58,8 +44,7 @@ services:
     environment:
       - DEFAULT_EMAIL=instancesAY2-noreply@silvus.me
     depends_on:
-      nginx-proxy:
-        condition: service_healthy
+      - nginx-proxy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./certs:/etc/nginx/certs
@@ -70,7 +55,7 @@ services:
     restart: always
 
   postgres:
-    image: postgres:15-alpine
+    image: postgres:15
     container_name: postgres
     environment:
       POSTGRES_USER: postgres
@@ -83,12 +68,6 @@ services:
     networks:
       - nginx-network
     restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
 
 volumes:
   postgres-data:
