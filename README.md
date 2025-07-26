@@ -64,11 +64,23 @@ Ce site permet aux joueurs des différentes instances d'Aystone2 de partager et 
 - Exécuter les migrations : `docker-compose exec app node ace migration:run`
 - Accéder au shell du conteneur : `docker-compose exec app sh`
 
+### Stockage S3
+
+Le projet utilise MinIO comme service de stockage S3-compatible pour les uploads d'images et autres fichiers. Toutes les images sont stockées dans S3 au lieu d'être conservées dans un dossier local du projet. Cela permet une gestion cohérente des fichiers entre les environnements de développement et de production.
+
+- **Console MinIO** : Accessible à l'adresse http://localhost:9001 (utilisateur: `minio`, mot de passe: `minio123`)
+- **API S3** : Accessible à l'adresse http://localhost:9000
+- **Bucket** : Un bucket nommé `uploads` est automatiquement créé au démarrage
+- **Persistance** : Les données sont persistées via un volume Docker nommé `s3data`
+
+Les variables d'environnement pour la connexion au service S3 sont configurées dans le fichier `.env` :
+
 ## Technologies utilisées
 
 - **Backend** : AdonisJS (Node.js)
 - **Frontend** : React avec InertiaJS
 - **Base de données** : PostgreSQL
+- **Stockage** : MinIO (S3-compatible)
 - **Styles** : Tailwind CSS
 - **Conteneurisation** : Docker et Docker Compose
 

@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node bin/server.js",
     "build": "node ace build --ignore-ts-errors",
+    "deploy": "npm run build && cp .env build/.env && cd build && npm install && pm2 restart 0",
     "dev": "node ace serve --watch",
     "test": "node ace test",
     "lint": "eslint .",
@@ -67,6 +68,8 @@
     "@adonisjs/shield": "^8.2.0",
     "@adonisjs/static": "^1.1.1",
     "@adonisjs/vite": "^4.0.0",
+    "@aws-sdk/client-s3": "^3.850.0",
+    "@aws-sdk/s3-request-presigner": "^3.850.0",
     "@inertiajs/react": "^2.0.17",
     "@vinejs/vine": "^3.0.1",
     "edge.js": "^6.2.1",

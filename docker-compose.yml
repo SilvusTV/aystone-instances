@@ -14,5 +14,38 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  s3:
+    image: minio/minio
+    container_name: aystone2-s3
+    ports:
+      - "127.0.0.1:9000:9000"  # S3 API
+      - "127.0.0.1:9001:9001"  # Web console
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    volumes:
+      - s3data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  createbuckets:
+    image: minio/mc
+    container_name: aystone2-createbuckets
+    depends_on:
+      - s3
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      /usr/bin/mc config host add myminio http://s3:9000 minio minio123;
+      /usr/bin/mc mb myminio/uploads;
+      /usr/bin/mc policy set public myminio/uploads;
+      exit 0;
+      "
+
 volumes:
   pgdata:
+  s3data:

@@ -160,9 +160,23 @@ export default class AdminController {
 
     try {
       // Delete the old image from S3 if it exists
-      if (instance.image && instance.image.includes('://')) {
+      if (instance.image) {
         try {
-          await s3Service.deleteFile(instance.image)
+          // Check if it's a direct S3 URL or our S3 controller URL
+          if (instance.image.includes('://')) {
+            // Direct S3 URL
+            await s3Service.deleteFile(instance.image)
+          } else if (instance.image.startsWith('/s3/')) {
+            // Our S3 controller URL format: /s3/directory/filename
+            const parts = instance.image.split('/')
+            // parts[0] is empty, parts[1] is 's3', parts[2] is directory, parts[3] is filename
+            const directory = parts[2]
+            const filename = parts[3]
+            const key = `${directory}/${filename}`
+
+            // Delete the file using the key
+            await s3Service.deleteFileByKey(key)
+          }
         } catch (deleteError) {
           console.error('Error deleting old image from S3:', deleteError)
           // Continue with the upload even if deleting the old image fails
@@ -170,9 +184,26 @@ export default class AdminController {
       }
 
       // Upload the new image to S3
-      const imageUrl = await s3Service.uploadFile(image, 'instances')
+      const s3Url = await s3Service.uploadFile(image, 'instances')
 
-      // Update the instance with the S3 image URL
+      // Extract the key from the S3 URL
+      const urlParts = new URL(s3Url)
+      const pathParts = urlParts.pathname.split('/')
+
+      // Remove the first empty element and the bucket name
+      pathParts.shift() // Remove empty element
+      pathParts.shift() // Remove bucket name
+
+      // Get the directory and filename
+      const key = pathParts.join('/')
+      const parts = key.split('/')
+      const directory = parts[0]
+      const filename = parts[1]
+
+      // Create a URL that uses our S3 controller route
+      const imageUrl = `/s3/${directory}/${filename}`
+
+      // Update the instance with the URL that uses our S3 controller
       instance.image = imageUrl
       await instance.save()
 

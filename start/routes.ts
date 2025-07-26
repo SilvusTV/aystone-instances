@@ -10,6 +10,12 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
 
+// S3 file serving route
+router.get('/s3/:directory/:filename', async (ctx) => {
+  const { default: S3Controller } = await import('#controllers/s3_controller')
+  return new S3Controller().serveFile(ctx)
+})
+
 // Public routes
 router
   .get('/', async (ctx) => {
