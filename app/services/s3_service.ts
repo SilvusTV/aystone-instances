@@ -29,6 +29,20 @@ class S3Service {
   }
 
   /**
+   * Get the S3 client
+   */
+  getClient(): S3Client {
+    return this.client
+  }
+
+  /**
+   * Get the bucket name
+   */
+  getBucket(): string {
+    return this.bucket
+  }
+
+  /**
    * Ensure the bucket exists, creating it if necessary
    */
   async ensureBucketExists(): Promise<void> {
