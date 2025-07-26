@@ -29,11 +29,7 @@ export default class AuthController {
       }
 
       try {
-        console.log('Mot de passe reçu:', `"${password}"`)
-        console.log('Mot de passe en base:', user.password)
-
         const isPasswordValid = await hash.verify(user.password, password)
-        console.log('Mot de passe valide ?', isPasswordValid)
 
         if (!isPasswordValid) {
           session.flash('error', 'Mot de passe incorrect')
@@ -137,7 +133,6 @@ export default class AuthController {
   async showResetPassword({ inertia, request, response, session }: HttpContext) {
     try {
       const { token } = request.qs()
-      console.log('Token reçu pour reset password :', token)
 
       if (!token) {
         session.flash('error', 'Token de réinitialisation manquant.')
@@ -147,8 +142,6 @@ export default class AuthController {
       const user = await User.query()
         .where('reset_token', token)
         .first()
-
-      console.log('Utilisateur avec token ?', user ? 'Oui' : 'Non')
 
       return inertia.render('auth/reset-password', { token })
     } catch (error) {

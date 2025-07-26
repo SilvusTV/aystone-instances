@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react'
 import { Head, useForm } from '@inertiajs/react'
 import Layout from '@/components/layout'
 import { PageProps } from '@/types'
@@ -8,10 +7,6 @@ interface ResetPasswordProps extends PageProps {
 }
 
 export default function ResetPassword({ flash, token }: ResetPasswordProps) {
-  // Log for debugging
-  useEffect(() => {
-    console.log('Reset password page loaded with token:', token)
-  }, [token])
 
   const { data, setData, post, processing, errors } = useForm({
     token,

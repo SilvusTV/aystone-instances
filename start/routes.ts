@@ -133,7 +133,6 @@ router
 // Route for password reset page
 router
   .get('/reset-password', async (ctx) => {
-    console.log('Reset password route hit with query:', ctx.request.qs())
     const { default: AuthController } = await import('#controllers/auth_controller')
     return new AuthController().showResetPassword(ctx)
   })

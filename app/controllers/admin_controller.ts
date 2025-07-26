@@ -2,8 +2,7 @@ import User from '#models/user'
 import Instance from '#models/instance'
 import { HttpContext } from '@adonisjs/core/http'
 import hash from '@adonisjs/core/services/hash'
-import fs from 'node:fs'
-import path from 'node:path'
+import s3Service from '#services/s3_service'
 
 export default class AdminController {
   async users({ inertia }: HttpContext) {
@@ -160,44 +159,21 @@ export default class AdminController {
     }
 
     try {
-      // Delete the old image if it exists
-      if (instance.image) {
+      // Delete the old image from S3 if it exists
+      if (instance.image && instance.image.includes('://')) {
         try {
-          // Extract the file path from the URL
-          // The image URL is like: /resources/uploads/instances/filename.jpg
-          // We need to remove the /resources prefix to get the actual file path
-          const oldImagePath = instance.image.replace('/resources', '')
-          const fullOldImagePath = path.join(process.cwd(), 'resources', oldImagePath)
-
-          // Check if the file exists before attempting to delete it
-          if (fs.existsSync(fullOldImagePath)) {
-            fs.unlinkSync(fullOldImagePath)
-            console.log(`Deleted old image: ${fullOldImagePath}`)
-          }
+          await s3Service.deleteFile(instance.image)
         } catch (deleteError) {
-          console.error('Error deleting old image:', deleteError)
+          console.error('Error deleting old image from S3:', deleteError)
           // Continue with the upload even if deleting the old image fails
         }
       }
 
-      // Generate a unique name for the image
-      const imageName = `${new Date().getTime()}_${image.clientName}`
+      // Upload the new image to S3
+      const imageUrl = await s3Service.uploadFile(image, 'instances')
 
-      // Create the uploads directory if it doesn't exist
-      const uploadsDir = path.join(process.cwd(), 'resources', 'uploads', 'instances')
-
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true })
-      }
-
-      // Move the uploaded file to the resources/uploads/instances directory
-      await image.move(uploadsDir, {
-        name: imageName,
-        overwrite: true,
-      })
-
-      // Update the instance with the image path
-      instance.image = `/resources/uploads/instances/${imageName}`
+      // Update the instance with the S3 image URL
+      instance.image = imageUrl
       await instance.save()
 
       session.flash('success', `Image de l'instance "${instance.name}" mise à jour avec succès`)
