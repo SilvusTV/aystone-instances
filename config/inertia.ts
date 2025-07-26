@@ -11,7 +11,7 @@ const inertiaConfig = defineConfig({
    * Data that should be shared with all rendered pages
    */
   sharedData: {
-    auth: (ctx) => ctx.inertia.always(() => ({ user: ctx.auth.user })),
+    auth: (ctx) => ctx.inertia.always(() => ({ user: ctx.auth?.user || null })),
     flash: (ctx) =>
       ctx.inertia.always(() => {
         // Ensure flash messages are always available, even when session middleware hasn't been applied
