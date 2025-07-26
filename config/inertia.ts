@@ -12,7 +12,11 @@ const inertiaConfig = defineConfig({
    */
   sharedData: {
     auth: (ctx) => ctx.inertia.always(() => ({ user: ctx.auth.user })),
-    flash: (ctx) => ctx.session.flashMessages,
+    flash: (ctx) =>
+      ctx.inertia.always(() => {
+        // Ensure flash messages are always available, even when session middleware hasn't been applied
+        return ctx.session?.flashMessages || {}
+      }),
   },
 
   /**
