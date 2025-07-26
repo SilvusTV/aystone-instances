@@ -63,10 +63,14 @@ Ce site permet aux joueurs des différentes instances d'Aystone2 de partager et 
 
 4. Le service Let's Encrypt obtiendra automatiquement un certificat SSL pour votre domaine et configurera HTTPS.
 
+   Note : La configuration actuelle utilise l'environnement de staging de Let's Encrypt pour éviter les limites de taux pendant les tests. Les certificats de staging ne sont pas approuvés par les navigateurs par défaut. Une fois que tout fonctionne correctement, vous pouvez supprimer la ligne `ACME_CA_URI=https://acme-staging-v02.api.letsencrypt.org/directory` du service letsencrypt dans le fichier compose-production.yml pour utiliser l'environnement de production de Let's Encrypt.
+
 5. Accédez à l'application dans votre navigateur :
    ```
-   https://instances-aystone.silvus.me
+   https://instances-aystone.silvus.me:8080
    ```
+
+   Note : Le port 8080 est utilisé au lieu du port 80 standard pour éviter les conflits avec d'autres services qui pourraient déjà utiliser le port 80.
 
 Note : Si vous rencontrez des problèmes avec HTTPS, vérifiez les logs des conteneurs :
    ```bash
