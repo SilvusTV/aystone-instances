@@ -28,7 +28,7 @@ export const http = defineConfig({
   /**
    * Trust proxy configuration for applications behind a reverse proxy
    */
-  trustProxy: true,
+  trustProxy: app.inProduction,
 
   /**
    * Manage cookies configuration. The settings for the session id cookie are
