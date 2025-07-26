@@ -37,6 +37,7 @@ export interface Tag {
 export interface Instance {
   id: number
   name: string
+  image?: string | null
   createdAt: string
   updatedAt: string | null
   descriptions?: InstanceDescription[]

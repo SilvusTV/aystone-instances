@@ -11,7 +11,7 @@ export default function InstancesIndex({ instances = [] }: InstancesIndexProps) 
   return (
     <Layout>
       <Head title="Instances" />
-      
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Instances Aystone2</h1>
         <p className="text-lg">
@@ -26,8 +26,21 @@ export default function InstancesIndex({ instances = [] }: InstancesIndexProps) 
               <div className="p-4 bg-primary-100 dark:bg-primary-900">
                 <h3 className="text-xl font-bold">{instance.name}</h3>
               </div>
-              
+
               <div className="p-4">
+                <div className="flex justify-center mb-4">
+                  {instance.image ? (
+                    <img 
+                      src={instance.image} 
+                      alt={instance.name} 
+                      className="w-24 h-24 object-cover rounded-full"
+                    />
+                  ) : (
+                    <div className="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                      <span className="text-gray-500 dark:text-gray-400 text-xs">No img</span>
+                    </div>
+                  )}
+                </div>
                 <div className="flex justify-center mt-4">
                   <Link
                     href={`/instances/${instance.id}`}

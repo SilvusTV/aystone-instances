@@ -12,6 +12,10 @@ const staticServerConfig = defineConfig({
   etag: true,
   lastModified: true,
   dotFiles: 'ignore',
+  // Add resources directory as a static files source
+  mappings: {
+    '/resources': 'resources',
+  },
 })
 
 export default staticServerConfig

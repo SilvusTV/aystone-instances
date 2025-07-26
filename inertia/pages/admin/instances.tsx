@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Head, Link, useForm } from '@inertiajs/react'
 import Layout from '@/components/layout'
 import { Instance, PageProps } from '@/types'
@@ -11,6 +11,24 @@ export default function AdminInstances({ instances = [], flash }: AdminInstances
   const { data, setData, post, processing, errors } = useForm({
     name: '',
   })
+
+  const [csrfToken, setCsrfToken] = useState('')
+
+  // Function to get CSRF token from cookie
+  const getCsrfToken = () => {
+    const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'))
+    if (match) {
+      return decodeURIComponent(match[2])
+    }
+    // Fallback to look for the token in other possible cookie names
+    const altMatch = document.cookie.match(new RegExp('(^| )adonis-session=([^;]+)'))
+    return altMatch ? decodeURIComponent(altMatch[2]) : null
+  }
+
+  // Get CSRF token on component mount
+  useEffect(() => {
+    setCsrfToken(getCsrfToken() || '')
+  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,16 +96,63 @@ export default function AdminInstances({ instances = [], flash }: AdminInstances
             <ul className="divide-y divide-gray-200 dark:divide-gray-700">
               {instances.map((instance) => (
                 <li key={instance.id} className="py-3 flex justify-between items-center">
-                  <div>
-                    <span className="font-medium">{instance.name}</span>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      ID: {instance.id}
+                  <div className="flex items-center">
+                    {instance.image ? (
+                      <img 
+                        src={instance.image} 
+                        alt={instance.name} 
+                        className="w-12 h-12 object-cover rounded-full mr-3"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full mr-3 flex items-center justify-center">
+                        <span className="text-gray-500 dark:text-gray-400 text-xs">No img</span>
+                      </div>
+                    )}
+                    <div>
+                      <span className="font-medium">{instance.name}</span>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        ID: {instance.id}
+                      </div>
                     </div>
                   </div>
-                  <div>
+                  <div className="flex items-center">
+                    <div className="mr-4">
+                      <label className="cursor-pointer bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 py-1 px-2 rounded text-sm">
+                        <span>Image</span>
+                        <input 
+                          type="file" 
+                          name="image" 
+                          className="hidden" 
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              const formData = new FormData();
+                              formData.append('image', e.target.files[0]);
+
+                              fetch(`/admin/instances/${instance.id}/image`, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                  'X-XSRF-TOKEN': getCsrfToken() || '',
+                                },
+                              })
+                              .then(response => {
+                                if (response.ok) {
+                                  window.location.reload();
+                                } else {
+                                  alert(`Erreur lors de l'upload de l'image: ${response.status} ${response.statusText}`);
+                                }
+                              })
+                              .catch(() => {
+                                alert(`Une erreur est survenue lors de l'upload de l'image.`);
+                              });
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
                     <Link
                       href={`/instances/${instance.id}`}
-                      className="text-primary-600 hover:text-primary-800 dark:text-primary-400 mr-4"
+                      className="text-primary-600 hover:text-primary-800 dark:text-primary-400"
                     >
                       Voir
                     </Link>

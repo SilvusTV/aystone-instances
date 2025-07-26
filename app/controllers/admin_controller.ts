@@ -2,6 +2,8 @@ import User from '#models/user'
 import Instance from '#models/instance'
 import { HttpContext } from '@adonisjs/core/http'
 import hash from '@adonisjs/core/services/hash'
+import fs from 'node:fs'
+import path from 'node:path'
 
 export default class AdminController {
   async users({ inertia }: HttpContext) {
@@ -128,6 +130,80 @@ export default class AdminController {
     } catch (error) {
       console.error('Error creating instance:', error)
       session.flash('error', "Erreur lors de la création de l'instance")
+    }
+
+    return response.redirect('/admin/instances')
+  }
+
+  async updateInstanceImage({ params, request, response, session }: HttpContext) {
+    const instance = await Instance.find(params.id)
+
+    if (!instance) {
+      session.flash('error', 'Instance non trouvée')
+      return response.redirect('/admin/instances')
+    }
+
+    // Handle image upload
+    const image = request.file('image', {
+      size: '2mb',
+      extnames: ['jpg', 'png', 'jpeg', 'gif'],
+    })
+
+    if (!image) {
+      session.flash('error', 'Aucune image fournie')
+      return response.redirect('/admin/instances')
+    }
+
+    if (!image.isValid) {
+      session.flash('error', `Erreur lors de l'upload de l'image: ${image.errors.join(', ')}`)
+      return response.redirect('/admin/instances')
+    }
+
+    try {
+      // Delete the old image if it exists
+      if (instance.image) {
+        try {
+          // Extract the file path from the URL
+          // The image URL is like: /resources/uploads/instances/filename.jpg
+          // We need to remove the /resources prefix to get the actual file path
+          const oldImagePath = instance.image.replace('/resources', '')
+          const fullOldImagePath = path.join(process.cwd(), 'resources', oldImagePath)
+
+          // Check if the file exists before attempting to delete it
+          if (fs.existsSync(fullOldImagePath)) {
+            fs.unlinkSync(fullOldImagePath)
+            console.log(`Deleted old image: ${fullOldImagePath}`)
+          }
+        } catch (deleteError) {
+          console.error('Error deleting old image:', deleteError)
+          // Continue with the upload even if deleting the old image fails
+        }
+      }
+
+      // Generate a unique name for the image
+      const imageName = `${new Date().getTime()}_${image.clientName}`
+
+      // Create the uploads directory if it doesn't exist
+      const uploadsDir = path.join(process.cwd(), 'resources', 'uploads', 'instances')
+
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true })
+      }
+
+      // Move the uploaded file to the resources/uploads/instances directory
+      await image.move(uploadsDir, {
+        name: imageName,
+        overwrite: true,
+      })
+
+      // Update the instance with the image path
+      instance.image = `/resources/uploads/instances/${imageName}`
+      await instance.save()
+
+      session.flash('success', `Image de l'instance "${instance.name}" mise à jour avec succès`)
+    } catch (error) {
+      console.error('Error updating instance image:', error)
+      session.flash('error', "Erreur lors de la mise à jour de l'image de l'instance")
     }
 
     return response.redirect('/admin/instances')

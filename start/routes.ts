@@ -283,3 +283,10 @@ router
     return new AdminController().createInstance(ctx)
   })
   .middleware([middleware.auth(), middleware.admin()])
+
+router
+  .post('/admin/instances/:id/image', async (ctx) => {
+    const { default: AdminController } = await import('#controllers/admin_controller')
+    return new AdminController().updateInstanceImage(ctx)
+  })
+  .middleware([middleware.auth(), middleware.admin()])

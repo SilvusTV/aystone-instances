@@ -24,6 +24,8 @@ export default function About() {
             comme les coordonnées, la dimension, et même un lien vers la dynmap pour que d'autres puissent facilement
             trouver et visiter vos constructions.
           </p>
+          <p>Ce site est inspiré du <a href="https://cobble.ultralion.xyz/"> siteweb de l'instance cobble</a> créé par le développeur et joueur <a
+            href="https://ultralion.xyz/"> UltraLion</a></p>
         </div>
         
         <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">

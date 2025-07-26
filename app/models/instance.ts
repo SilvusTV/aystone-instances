@@ -12,6 +12,9 @@ export default class Instance extends BaseModel {
   @column()
   declare name: string
 
+  @column()
+  declare image: string | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
