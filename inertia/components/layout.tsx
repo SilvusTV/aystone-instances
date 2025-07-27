@@ -11,6 +11,7 @@ export default function Layout({ children }: LayoutProps) {
   const [darkMode, setDarkMode] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const isAdmin = auth.user?.role === 'admin'
 
   // Function to get CSRF token from cookie
@@ -155,7 +156,38 @@ export default function Layout({ children }: LayoutProps) {
               </Link>
             </div>
 
-            <nav className="flex items-center space-x-6">
+            {/* Mobile menu button */}
+            <div className="flex items-center md:hidden">
+              <button
+                onClick={toggleDarkMode}
+                className="bg-gray-200 dark:bg-gray-700 p-2 rounded-full mr-4"
+                aria-label="Toggle dark mode"
+              >
+                {darkMode ? '☀️' : '🌙'}
+              </button>
+              <button 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="text-white focus:outline-none"
+                aria-label="Toggle mobile menu"
+              >
+                <svg 
+                  className="w-6 h-6" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24" 
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  {isMobileMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+            </div>
+
+            {/* Desktop navigation */}
+            <nav className="hidden md:flex items-center space-x-6">
               <Link href="/" className="hover:text-primary-200 transition">
                 Accueil
               </Link>
@@ -252,11 +284,106 @@ export default function Layout({ children }: LayoutProps) {
               <button
                 onClick={toggleDarkMode}
                 className="bg-gray-200 dark:bg-gray-700 p-2 rounded-full"
+                aria-label="Toggle dark mode"
               >
                 {darkMode ? '☀️' : '🌙'}
               </button>
             </nav>
           </div>
+
+          {/* Mobile menu */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden bg-primary-800 text-white">
+              <div className="container mx-auto px-4 py-3 space-y-3">
+                <Link 
+                  href="/" 
+                  className="block py-2 hover:text-primary-200 transition"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Accueil
+                </Link>
+                <Link 
+                  href="/about" 
+                  className="block py-2 hover:text-primary-200 transition"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  À propos
+                </Link>
+                <Link 
+                  href="/instances" 
+                  className="block py-2 hover:text-primary-200 transition"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Instances
+                </Link>
+
+                {auth.user ? (
+                  <div className="border-t border-primary-700 pt-3 space-y-3">
+                    {['joueur', 'instanceAdmin', 'admin'].includes(auth.user.role) && (
+                      <Link 
+                        href="/dashboard" 
+                        className="block py-2 hover:text-primary-200 transition"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Mes projets
+                      </Link>
+                    )}
+                    {['admin'].includes(auth.user.role) && (
+                      <Link 
+                        href="/dashboard/s3" 
+                        className="block py-2 hover:text-primary-200 transition"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Gestionnaire S3
+                      </Link>
+                    )}
+                    {isAdmin && (
+                      <Link 
+                        href={`/admin/users`}
+                        className="block py-2 hover:text-primary-200 transition"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Gestion des membres
+                      </Link>
+                    )}
+                    <Link 
+                      href="/profile" 
+                      className="block py-2 hover:text-primary-200 transition"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Mon profil
+                    </Link>
+                    <Link
+                      href="/logout"
+                      method="post"
+                      as="button"
+                      className="block w-full text-left py-2 text-red-400 hover:text-red-300 transition"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Déconnexion
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="border-t border-primary-700 pt-3 flex flex-col space-y-3">
+                    <Link
+                      href="/login"
+                      className="block py-2 hover:text-primary-200 transition"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Connexion
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="block py-2 hover:text-primary-200 transition"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Inscription
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </header>
 
         <main className="flex-1 container mx-auto px-4 py-8">{children}</main>

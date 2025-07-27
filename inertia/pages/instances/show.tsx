@@ -22,34 +22,34 @@ export default function InstanceShow({ instance }: InstanceShowProps) {
 
       {/* Sub-navigation */}
       <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-6">
-        <nav className="flex flex-wrap gap-4">
+        <nav className="flex flex-wrap gap-2 sm:gap-4">
           <Link
             href={`/instances/${instance.name}`}
-            className="px-4 py-2 rounded bg-primary-500 text-white hover:bg-primary-600 transition"
+            className="px-3 py-2 sm:px-4 text-sm sm:text-base rounded bg-primary-500 text-white hover:bg-primary-600 transition flex-grow sm:flex-grow-0 text-center"
           >
             Aperçu
           </Link>
           <Link
             href={`/instances/${instance.name}/projects`}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+            className="px-3 py-2 sm:px-4 text-sm sm:text-base rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition flex-grow sm:flex-grow-0 text-center"
           >
             Projets
           </Link>
           <Link
             href={`/instances/${instance.name}/description`}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+            className="px-3 py-2 sm:px-4 text-sm sm:text-base rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition flex-grow sm:flex-grow-0 text-center"
           >
             Description
           </Link>
           <Link
             href={`/instances/${instance.name}/members`}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+            className="px-3 py-2 sm:px-4 text-sm sm:text-base rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition flex-grow sm:flex-grow-0 text-center"
           >
             Membres
           </Link>
           <Link
             href={`/instances/${instance.name}/dynmap`}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+            className="px-3 py-2 sm:px-4 text-sm sm:text-base rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition flex-grow sm:flex-grow-0 text-center"
           >
             DynMap
           </Link>

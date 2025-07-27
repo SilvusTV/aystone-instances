@@ -209,11 +209,12 @@ export default function Home({ projects = [], tags = [], instances = [] }: HomeP
                 <p className="mb-4">{project.description.substring(0, 100)}...</p>
 
                 <div className="mb-4">
-                  <span className="font-semibold">Coordonnées:</span> X: {project.x}, Y: {project.y}, Z: {project.z}
+                  <span className="font-semibold">Coordonnées:</span> 
+                  <div className="text-sm sm:text-base">X: {project.x}, Y: {project.y}, Z: {project.z}</div>
                 </div>
 
-                <div className="flex justify-between items-center">
-                  <span className={`px-2 py-1 rounded text-sm ${
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                  <span className={`px-2 py-1 rounded text-sm inline-block ${
                     project.status === 'en_cours' 
                       ? 'bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200' 
                       : 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200'
@@ -226,7 +227,7 @@ export default function Home({ projects = [], tags = [], instances = [] }: HomeP
                       href={project.dynmapUrl} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm sm:text-base"
                     >
                       Voir sur la dynmap
                     </a>
