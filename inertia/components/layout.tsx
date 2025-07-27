@@ -11,6 +11,7 @@ export default function Layout({ children }: LayoutProps) {
   const [darkMode, setDarkMode] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const isAdmin = auth.user?.role === 'admin'
 
   // Function to get CSRF token from cookie
   const getCsrfToken = () => {
@@ -169,7 +170,7 @@ export default function Layout({ children }: LayoutProps) {
                 <div className="flex items-center space-x-4">
                   {['joueur', 'instanceAdmin', 'admin'].includes(auth.user.role) && (
                   <Link href="/dashboard" className="hover:text-primary-200 transition">
-                    Tableau de bord
+                    Mes projets
                   </Link>
                   )}
                   {['admin'].includes(auth.user.role) && (
@@ -202,6 +203,15 @@ export default function Layout({ children }: LayoutProps) {
 
                     {isDropdownOpen && (
                       <div id="user-dropdown" className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10">
+                        {isAdmin && (
+                          <Link 
+                            href={`/admin/users`}
+                            className="block px-4 py-2 text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                            onClick={() => setIsDropdownOpen(false)}
+                          >
+                            Gestion des membres
+                          </Link>
+                        )}
                         <Link 
                           href="/profile" 
                           className="block px-4 py-2 text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"

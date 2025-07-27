@@ -69,11 +69,9 @@ export default class InstancesController {
 
   async members({ inertia, params }: HttpContext) {
     const instance = await Instance.findByOrFail('name', params.name)
-    const projects = await Project.query().where('instance_id', instance.id).preload('user').exec()
 
-    // Get unique users from projects
-    const userIds = [...new Set(projects.map((project) => project.userId))]
-    const members = await User.query().whereIn('id', userIds).exec()
+    // Get all users who belong to this instance
+    const members = await User.query().where('instance_id', instance.id).exec()
 
     return inertia.render('instances/members', { instance, members })
   }

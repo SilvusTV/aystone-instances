@@ -1,4 +1,3 @@
-import React from 'react'
 import { Head, Link } from '@inertiajs/react'
 import Layout from '@/components/layout'
 import { Instance } from '@/types'
@@ -14,7 +13,7 @@ export default function InstanceShow({ instance }: InstanceShowProps) {
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Instance: {instance.name}</h1>
-        <div className="flex space-x-2 mb-4">
+        <div className="flex justify-between items-center mb-4">
           <Link href="/instances" className="text-primary-600 hover:text-primary-800 dark:text-primary-400">
             &larr; Retour aux instances
           </Link>

@@ -13,6 +13,12 @@ export default function AdminUsers({ users = [], instances = [], flash }: AdminU
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [newPassword, setNewPassword] = useState('')
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+
+  // Filter users based on search term
+  const filteredUsers = users.filter(user => 
+    user.username.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
 
   const { processing } = useForm()
@@ -113,6 +119,27 @@ export default function AdminUsers({ users = [], instances = [], flash }: AdminU
         </div>
       )}
 
+      <div className="flex justify-between items-center mb-6">
+        <div></div>
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Rechercher par pseudo MC"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -128,7 +155,7 @@ export default function AdminUsers({ users = [], instances = [], flash }: AdminU
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr key={user.id} className="border-b dark:border-gray-700">
                   <td className="px-4 py-3">{user.id}</td>
                   <td className="px-4 py-3 flex items-center">
@@ -225,10 +252,16 @@ export default function AdminUsers({ users = [], instances = [], flash }: AdminU
           </table>
         </div>
 
-        {users.length === 0 && (
+        {users.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-gray-500 dark:text-gray-400">
               Aucun utilisateur trouvé.
+            </p>
+          </div>
+        ) : filteredUsers.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-gray-500 dark:text-gray-400">
+              Aucun utilisateur ne correspond à votre recherche.
             </p>
           </div>
         )}

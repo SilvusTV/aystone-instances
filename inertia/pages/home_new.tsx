@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { Head, Link } from '@inertiajs/react'
+import { useState, useEffect } from 'react'
+import { Head } from '@inertiajs/react'
 import Layout from '@/components/layout'
 import { Project, Tag, Instance } from '@/types'
 

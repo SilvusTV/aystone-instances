@@ -1,22 +1,37 @@
 import React from 'react'
-import { Head, Link } from '@inertiajs/react'
+import { Head, Link, usePage } from '@inertiajs/react'
 import Layout from '@/components/layout'
-import { Instance } from '@/types'
+import { Instance, PageProps } from '@/types'
 
 interface InstancesIndexProps {
   instances: Instance[]
 }
 
 export default function InstancesIndex({ instances = [] }: InstancesIndexProps) {
+  const { auth } = usePage<PageProps>().props
+  const isAdmin = auth.user?.role === 'admin'
+
   return (
     <Layout>
       <Head title="Instances" />
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Instances Aystone2</h1>
-        <p className="text-lg">
-          Découvrez les différentes instances du serveur Minecraft Aystone2.
-        </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold mb-4">Instances Aystone2</h1>
+            <p className="text-lg">
+              Découvrez les différentes instances du serveur Minecraft Aystone2.
+            </p>
+          </div>
+          {isAdmin && (
+            <Link
+              href="/admin/instances"
+              className="px-4 py-2 rounded bg-primary-500 text-white hover:bg-primary-600 transition"
+            >
+              Gestion des instances
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
