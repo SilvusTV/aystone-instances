@@ -184,14 +184,25 @@ export default function Home({ projects = [], tags = [], instances = [] }: HomeP
         {filteredProjects.length > 0 ? (
           filteredProjects.map(project => (
             <div key={project.id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition dark:border-gray-700">
-              <div className={`p-4 ${project.status === 'en_cours' ? 'bg-yellow-100 dark:bg-yellow-900' : 'bg-green-100 dark:bg-green-900'}`}>
-                <h3 className="text-xl font-bold">{project.name}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Par {project.user?.username} • {project.dimension} • {project.tag?.label}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                  Instance: {project.instance?.name || 'Non spécifiée'}
-                </p>
+              <div 
+                className="p-4 relative"
+                style={{
+                  backgroundImage: project.instance?.name ? `url(/s3/instances/${project.instance.name}_texture.png)` : 'none',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundColor: project.status === 'en_cours' ? 'rgba(254, 240, 138, 0.8)' : 'rgba(187, 247, 208, 0.8)',
+                }}
+              >
+                <div className="relative z-10">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{project.name}</h3>
+                  <p className="text-sm text-gray-800 dark:text-white">
+                    Par {project.user?.username} • {project.dimension} • {project.tag?.label}
+                  </p>
+                  <p className="text-sm text-gray-800 dark:text-white mt-1">
+                    Instance: {project.instance?.name || 'Non spécifiée'}
+                  </p>
+                </div>
+                <div className="absolute inset-0 bg-white dark:bg-black opacity-50 z-0"></div>
               </div>
 
               <div className="p-4">

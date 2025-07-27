@@ -12,7 +12,7 @@ export default function About() {
         <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
           <h2 className="text-2xl font-semibold mb-4">À quoi sert ce site ?</h2>
           <p className="mb-4">
-            Ce site communautaire a été créé pour permettre aux joueurs de l'instance Dirt de partager
+            Ce site communautaire a été créé pour permettre aux joueurs des différentes instances de partager
             et de documenter leurs projets de construction.
           </p>
           <p className="mb-4">

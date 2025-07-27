@@ -16,6 +16,49 @@ router.get('/s3/:directory/:filename', async (ctx) => {
   return new S3Controller().serveFile(ctx)
 })
 
+// S3 management routes
+router
+  .get('/dashboard/s3', async (ctx) => {
+    const { default: S3Controller } = await import('#controllers/s3_controller')
+    return new S3Controller().dashboard(ctx)
+  })
+  .middleware([middleware.auth(), middleware.admin()])
+
+router
+  .get('/api/s3/files', async (ctx) => {
+    const { default: S3Controller } = await import('#controllers/s3_controller')
+    return new S3Controller().listFiles(ctx)
+  })
+  .middleware([middleware.auth(), middleware.admin()])
+
+router
+  .post('/api/s3/upload', async (ctx) => {
+    const { default: S3Controller } = await import('#controllers/s3_controller')
+    return new S3Controller().uploadFile(ctx)
+  })
+  .middleware([middleware.auth(), middleware.admin()])
+
+router
+  .delete('/api/s3/files', async (ctx) => {
+    const { default: S3Controller } = await import('#controllers/s3_controller')
+    return new S3Controller().deleteFile(ctx)
+  })
+  .middleware([middleware.auth(), middleware.admin()])
+
+router
+  .post('/api/s3/folders', async (ctx) => {
+    const { default: S3Controller } = await import('#controllers/s3_controller')
+    return new S3Controller().createFolder(ctx)
+  })
+  .middleware([middleware.auth(), middleware.admin()])
+
+router
+  .put('/api/s3/files', async (ctx) => {
+    const { default: S3Controller } = await import('#controllers/s3_controller')
+    return new S3Controller().renameFile(ctx)
+  })
+  .middleware([middleware.auth(), middleware.admin()])
+
 // Public routes
 router
   .get('/', async (ctx) => {

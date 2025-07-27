@@ -146,11 +146,11 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className={`${darkMode ? 'dark' : ''} overflow-x-hidden`}>
       <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-        <header className="bg-primary-500 text-white shadow-md">
+        <header className="text-white shadow-md" style={{ background: "linear-gradient(90deg,rgba(190, 77, 196, 1) 0%, rgba(147, 87, 199, 1) 50%, rgba(84, 22, 219, 1) 100%)" }}>
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <div className="flex items-center">
               <Link href="/" className="text-2xl font-bold">
-                Instances Aystone2
+                Aystone2 : Instances
               </Link>
             </div>
 
@@ -170,6 +170,11 @@ export default function Layout({ children }: LayoutProps) {
                   {['joueur', 'instanceAdmin', 'admin'].includes(auth.user.role) && (
                   <Link href="/dashboard" className="hover:text-primary-200 transition">
                     Tableau de bord
+                  </Link>
+                  )}
+                  {['admin'].includes(auth.user.role) && (
+                  <Link href="/dashboard/s3" className="hover:text-primary-200 transition">
+                    Gestionnaire S3
                   </Link>
                   )}
                   <div className="relative">
