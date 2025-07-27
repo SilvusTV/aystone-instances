@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column, hasMany, belongsTo } from '@adonisjs/lucid/orm'
-import type { HasMany, BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, hasMany, belongsTo, manyToMany } from '@adonisjs/lucid/orm'
+import type { HasMany, BelongsTo, ManyToMany } from '@adonisjs/lucid/types/relations'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import Project from './project.js'
 import Config from './config.js'
@@ -52,4 +52,11 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @belongsTo(() => Instance)
   declare instance: BelongsTo<typeof Instance>
+
+  @manyToMany(() => Project, {
+    pivotTable: 'project_collaborators',
+    pivotForeignKey: 'user_id',
+    pivotRelatedForeignKey: 'project_id',
+  })
+  declare collaboratedProjects: ManyToMany<typeof Project>
 }

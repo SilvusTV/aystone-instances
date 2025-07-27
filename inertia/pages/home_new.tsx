@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Head } from '@inertiajs/react'
+import { Head, Link } from '@inertiajs/react'
 import Layout from '@/components/layout'
 import { Project, Tag, Instance } from '@/types'
 
@@ -194,7 +194,11 @@ export default function Home({ projects = [], tags = [], instances = [] }: HomeP
                 }}
               >
                 <div className="relative z-10">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{project.name}</h3>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                    <Link href={`/projects/${project.id}?from=home`} className="text-white hover:text-white hover:underline">
+                      {project.name}
+                    </Link>
+                  </h3>
                   <p className="text-sm text-gray-800 dark:text-white">
                     Par {project.user?.username} • {project.dimension} • {project.tag?.label}
                   </p>

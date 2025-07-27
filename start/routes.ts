@@ -249,6 +249,12 @@ router
   })
   .middleware([middleware.auth(), middleware.player()])
 router
+  .get('/projects/:id', async (ctx) => {
+    const { default: ProjectsController } = await import('#controllers/projects_controller')
+    return new ProjectsController().show(ctx)
+  })
+  .middleware([middleware.silentAuth()])
+router
   .post('/projects', async (ctx) => {
     const { default: ProjectsController } = await import('#controllers/projects_controller')
     return new ProjectsController().store(ctx)
@@ -270,6 +276,21 @@ router
   .delete('/projects/:id', async (ctx) => {
     const { default: ProjectsController } = await import('#controllers/projects_controller')
     return new ProjectsController().destroy(ctx)
+  })
+  .middleware([middleware.auth(), middleware.player()])
+
+// Project collaborators routes
+router
+  .post('/projects/:id/collaborators', async (ctx) => {
+    const { default: ProjectsController } = await import('#controllers/projects_controller')
+    return new ProjectsController().addCollaborator(ctx)
+  })
+  .middleware([middleware.auth(), middleware.player()])
+
+router
+  .delete('/projects/:id/collaborators', async (ctx) => {
+    const { default: ProjectsController } = await import('#controllers/projects_controller')
+    return new ProjectsController().removeCollaborator(ctx)
   })
   .middleware([middleware.auth(), middleware.player()])
 

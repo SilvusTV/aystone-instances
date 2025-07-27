@@ -16,6 +16,9 @@ export default function EditProject({ project, tags = [], flash }: EditProjectPr
     x: project.x.toString(),
     y: project.y.toString(),
     z: project.z.toString(),
+    complementary_x: project.complementary_x ? project.complementary_x.toString() : '',
+    complementary_y: project.complementary_y ? project.complementary_y.toString() : '',
+    complementary_z: project.complementary_z ? project.complementary_z.toString() : '',
     tag_id: project.tagId.toString(),
     dynmap_url: project.dynmapUrl || '',
     status: project.status,
@@ -29,16 +32,16 @@ export default function EditProject({ project, tags = [], flash }: EditProjectPr
   return (
     <Layout>
       <Head title="Modifier le projet" />
-      
+
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Modifier le projet</h1>
-        
+
         {flash?.error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {flash.error}
           </div>
         )}
-        
+
         <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -60,7 +63,7 @@ export default function EditProject({ project, tags = [], flash }: EditProjectPr
                   <p className="text-red-500 text-sm mt-1">{errors.name}</p>
                 )}
               </div>
-              
+
               <div className="col-span-full">
                 <label htmlFor="description" className="block mb-2">
                   Description <span className="text-red-500">*</span>
@@ -79,7 +82,7 @@ export default function EditProject({ project, tags = [], flash }: EditProjectPr
                   <p className="text-red-500 text-sm mt-1">{errors.description}</p>
                 )}
               </div>
-              
+
               <div>
                 <label htmlFor="dimension" className="block mb-2">
                   Dimension <span className="text-red-500">*</span>
@@ -101,7 +104,7 @@ export default function EditProject({ project, tags = [], flash }: EditProjectPr
                   <p className="text-red-500 text-sm mt-1">{errors.dimension}</p>
                 )}
               </div>
-              
+
               <div>
                 <label htmlFor="tag_id" className="block mb-2">
                   Type de projet <span className="text-red-500">*</span>
@@ -126,7 +129,7 @@ export default function EditProject({ project, tags = [], flash }: EditProjectPr
                   <p className="text-red-500 text-sm mt-1">{errors.tag_id}</p>
                 )}
               </div>
-              
+
               <div>
                 <label htmlFor="status" className="block mb-2">
                   Statut <span className="text-red-500">*</span>
@@ -147,7 +150,7 @@ export default function EditProject({ project, tags = [], flash }: EditProjectPr
                   <p className="text-red-500 text-sm mt-1">{errors.status}</p>
                 )}
               </div>
-              
+
               <div className="col-span-full">
                 <h3 className="font-semibold mb-2">Coordonnées <span className="text-red-500">*</span></h3>
                 <div className="grid grid-cols-3 gap-4">
@@ -167,7 +170,7 @@ export default function EditProject({ project, tags = [], flash }: EditProjectPr
                       <p className="text-red-500 text-sm mt-1">{errors.x}</p>
                     )}
                   </div>
-                  
+
                   <div>
                     <label htmlFor="y" className="block mb-2">Y</label>
                     <input
@@ -184,7 +187,7 @@ export default function EditProject({ project, tags = [], flash }: EditProjectPr
                       <p className="text-red-500 text-sm mt-1">{errors.y}</p>
                     )}
                   </div>
-                  
+
                   <div>
                     <label htmlFor="z" className="block mb-2">Z</label>
                     <input
@@ -203,7 +206,63 @@ export default function EditProject({ project, tags = [], flash }: EditProjectPr
                   </div>
                 </div>
               </div>
-              
+
+              <div className="col-span-full">
+                <h3 className="font-semibold mb-2">Coordonnées complémentaires <span className="text-gray-500">(facultatif)</span></h3>
+                <p className="text-gray-500 text-sm mb-2">
+                  Si le monde est overworld, ces coordonnées seront celles du nether, et inversement.
+                </p>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label htmlFor="complementary_x" className="block mb-2">X</label>
+                    <input
+                      id="complementary_x"
+                      type="number"
+                      className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                        errors.complementary_x ? 'border-red-500' : ''
+                      }`}
+                      value={data.complementary_x}
+                      onChange={(e) => setData('complementary_x', e.target.value)}
+                    />
+                    {errors.complementary_x && (
+                      <p className="text-red-500 text-sm mt-1">{errors.complementary_x}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label htmlFor="complementary_y" className="block mb-2">Y</label>
+                    <input
+                      id="complementary_y"
+                      type="number"
+                      className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                        errors.complementary_y ? 'border-red-500' : ''
+                      }`}
+                      value={data.complementary_y}
+                      onChange={(e) => setData('complementary_y', e.target.value)}
+                    />
+                    {errors.complementary_y && (
+                      <p className="text-red-500 text-sm mt-1">{errors.complementary_y}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label htmlFor="complementary_z" className="block mb-2">Z</label>
+                    <input
+                      id="complementary_z"
+                      type="number"
+                      className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                        errors.complementary_z ? 'border-red-500' : ''
+                      }`}
+                      value={data.complementary_z}
+                      onChange={(e) => setData('complementary_z', e.target.value)}
+                    />
+                    {errors.complementary_z && (
+                      <p className="text-red-500 text-sm mt-1">{errors.complementary_z}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div className="col-span-full">
                 <label htmlFor="dynmap_url" className="block mb-2">
                   Lien Dynmap <span className="text-gray-500">(facultatif)</span>
@@ -225,7 +284,7 @@ export default function EditProject({ project, tags = [], flash }: EditProjectPr
                   Vous pouvez ajouter un lien direct vers votre projet sur la dynmap.
                 </p>
               </div>
-              
+
               <div className="col-span-full mt-4 flex justify-between">
                 <a
                   href="/dashboard"

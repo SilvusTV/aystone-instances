@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, belongsTo, manyToMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, ManyToMany } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 import Tag from './tag.js'
 import Instance from './instance.js'
@@ -34,6 +34,15 @@ export default class Project extends BaseModel {
   declare z: number
 
   @column()
+  declare complementary_x: number | null
+
+  @column()
+  declare complementary_y: number | null
+
+  @column()
+  declare complementary_z: number | null
+
+  @column()
   declare tagId: number
 
   @column()
@@ -56,4 +65,11 @@ export default class Project extends BaseModel {
 
   @belongsTo(() => Instance)
   declare instance: BelongsTo<typeof Instance>
+
+  @manyToMany(() => User, {
+    pivotTable: 'project_collaborators',
+    pivotForeignKey: 'project_id',
+    pivotRelatedForeignKey: 'user_id',
+  })
+  declare collaborators: ManyToMany<typeof User>
 }

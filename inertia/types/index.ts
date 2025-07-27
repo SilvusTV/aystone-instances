@@ -19,6 +19,9 @@ export interface Project {
   x: number
   y: number
   z: number
+  complementary_x: number | null
+  complementary_y: number | null
+  complementary_z: number | null
   tagId: number
   dynmapUrl: string | null
   status: 'en_cours' | 'termine'
@@ -27,6 +30,7 @@ export interface Project {
   user?: User
   tag?: Tag
   instance?: Instance
+  collaborators?: User[]
 }
 
 export interface Tag {
