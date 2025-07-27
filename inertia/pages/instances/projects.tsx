@@ -104,7 +104,11 @@ export default function InstanceProjects({ instance, projects = [] }: InstancePr
           filteredProjects.map(project => (
             <div key={project.id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition dark:border-gray-700">
               <div className={`p-4 ${project.status === 'en_cours' ? 'bg-yellow-100 dark:bg-yellow-900' : 'bg-green-100 dark:bg-green-900'}`}>
-                <h3 className="text-xl font-bold">{project.name}</h3>
+                <h3 className="text-xl font-bold">
+                  <Link href={`/projects/${project.id}?from=instance_projects&instance=${instance.name}`} className="text-white hover:text-white hover:underline">
+                    {project.name}
+                  </Link>
+                </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
                   Par {project.user?.username} • {project.dimension} • {project.tag?.label}
                 </p>
@@ -114,7 +118,12 @@ export default function InstanceProjects({ instance, projects = [] }: InstancePr
                 <p className="mb-4">{project.description.substring(0, 100)}...</p>
 
                 <div className="mb-4">
-                  <span className="font-semibold">Coordonnées:</span> X: {project.x}, Y: {project.y}, Z: {project.z}
+                  <div><span className="font-semibold">Coordonnées:</span> X: {project.x}, Y: {project.y}, Z: {project.z}</div>
+                  {(project.complementary_x !== null || project.complementary_y !== null || project.complementary_z !== null) && (
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      <span className="font-semibold">Coordonnées complémentaires{project.dimension === 'overworld' ? ' (Nether)' : project.dimension === 'nether' ? ' (Overworld)' : ''}:</span> X: {project.complementary_x}, Y: {project.complementary_y}, Z: {project.complementary_z}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex justify-between items-center">

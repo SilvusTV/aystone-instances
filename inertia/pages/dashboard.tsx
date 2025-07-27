@@ -92,10 +92,19 @@ export default function Dashboard({ auth = { user: null }, projects = [], flash 
                     <tbody>
                       {projects.map((project) => (
                         <tr key={`table-${project.id}`} className="border-b dark:border-gray-700">
-                          <td className="px-4 py-3">{project.name}</td>
+                          <td className="px-4 py-3">
+                            <Link href={`/projects/${project.id}?from=dashboard`} className="text-white hover:text-white hover:underline">
+                              {project.name}
+                            </Link>
+                          </td>
                           <td className="px-4 py-3">{project.dimension}</td>
                           <td className="px-4 py-3">
                             X: {project.x}, Y: {project.y}, Z: {project.z}
+                            {(project.complementary_x !== null || project.complementary_y !== null || project.complementary_z !== null) && (
+                              <div className="text-gray-500 text-sm">
+                                Comp. {project.dimension === 'overworld' ? '(Nether)' : project.dimension === 'nether' ? '(Overworld)' : ''}: X: {project.complementary_x}, Y: {project.complementary_y}, Z: {project.complementary_z}
+                              </div>
+                            )}
                           </td>
                           <td className="px-4 py-3">
                             <span
@@ -142,7 +151,11 @@ export default function Dashboard({ auth = { user: null }, projects = [], flash 
                   {projects.map((project) => (
                     <div key={`card-${project.id}`} className="bg-white dark:bg-gray-700 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-600">
                       <div className="flex justify-between items-start mb-3">
-                        <h3 className="font-bold text-lg">{project.name}</h3>
+                        <h3 className="font-bold text-lg">
+                          <Link href={`/projects/${project.id}?from=dashboard`} className="text-white hover:text-white hover:underline">
+                            {project.name}
+                          </Link>
+                        </h3>
                         <span
                           className={`px-2 py-1 rounded text-sm ${
                             project.status === 'en_cours'
@@ -157,6 +170,9 @@ export default function Dashboard({ auth = { user: null }, projects = [], flash 
                       <div className="space-y-2 mb-4">
                         <p><span className="font-medium">Dimension:</span> {project.dimension}</p>
                         <p><span className="font-medium">Coordonnées:</span> X: {project.x}, Y: {project.y}, Z: {project.z}</p>
+                        {(project.complementary_x !== null || project.complementary_y !== null || project.complementary_z !== null) && (
+                          <p><span className="font-medium">Coordonnées complémentaires{project.dimension === 'overworld' ? ' (Nether)' : project.dimension === 'nether' ? ' (Overworld)' : ''}:</span> X: {project.complementary_x}, Y: {project.complementary_y}, Z: {project.complementary_z}</p>
+                        )}
                       </div>
 
                       <div className="flex space-x-2">
