@@ -1,6 +1,7 @@
 import Project from '#models/project'
 import Tag from '#models/tag'
 import User from '#models/user'
+import UserVisitedProject from '#models/user_visited_project'
 import { HttpContext } from '@adonisjs/core/http'
 
 export default class ProjectsController {
@@ -16,7 +17,7 @@ export default class ProjectsController {
     await project.load('collaborators')
 
     // If the user is the owner of the project or an admin, get users from the same instance for collaborator selection
-    let users = []
+    let users: User[] = []
     if (auth.user && (auth.user.id === project.userId || auth.user.role === 'admin')) {
       users = await User.query()
         .where('instance_id', project.instanceId)
@@ -24,12 +25,19 @@ export default class ProjectsController {
         .exec()
     }
 
+    // Add visited status to project if user is authenticated and has visiteurPlus role
+    if (auth.user && auth.user.role === 'visiteurPlus') {
+      // Use the static method to set the isVisited property
+      await Project.setVisitedStatus(project, auth.user.id)
+    }
+
     return inertia.render('projects/show', { project, users })
   }
-  async index({ inertia, request }: HttpContext) {
+  async index({ inertia, request, auth }: HttpContext) {
     const status = request.input('status', 'all')
     const dimension = request.input('dimension', 'all')
     const tagId = request.input('tag_id', 'all')
+    const visitedFilter = request.input('visited', 'all')
 
     let query = Project.query().preload('user').preload('tag')
 
@@ -45,13 +53,28 @@ export default class ProjectsController {
       query = query.where('tag_id', tagId)
     }
 
-    const projects = await query.exec()
+    // Sort projects by creation date in descending order (newest first)
+    query = query.orderBy('created_at', 'desc')
+
+    let projects = await query.exec()
     const tags = await Tag.all()
+
+    // Add visited status to projects if user is authenticated and has visiteurPlus role
+    if (auth.user && auth.user.role === 'visiteurPlus') {
+      // Use the static method to set the isVisited property
+      await Project.setVisitedStatus(projects, auth.user.id)
+
+      // Apply visited filter if specified
+      if (visitedFilter !== 'all') {
+        const isVisited = visitedFilter === 'visited'
+        projects = projects.filter((project) => project.isVisited === isVisited)
+      }
+    }
 
     return inertia.render('projects/index', {
       projects,
       tags,
-      filters: { status, dimension, tagId },
+      filters: { status, dimension, tagId, visited: visitedFilter },
     })
   }
 
@@ -157,6 +180,9 @@ export default class ProjectsController {
       'status',
     ])
 
+    // Store the original status before updating
+    const originalStatus = project.status
+
     project.name = data.name
     project.description = data.description
     project.dimension = data.dimension
@@ -171,6 +197,19 @@ export default class ProjectsController {
     project.status = data.status
 
     await project.save()
+
+    // Check if status changed from "en_cours" to "termine"
+    if (originalStatus === 'en_cours' && project.status === 'termine') {
+      try {
+        // Delete all records from users_visited_project for this project
+        await UserVisitedProject.query().where('projectId', project.id).delete()
+        console.log(
+          `Deleted visited records for project ${project.id} after status change to "termine"`
+        )
+      } catch (error) {
+        console.error('Error deleting visited project records:', error)
+      }
+    }
 
     return response.redirect('/dashboard')
   }
@@ -196,7 +235,7 @@ export default class ProjectsController {
     const user = auth.user!
 
     await user.load('projects', (query) => {
-      query.preload('tag')
+      query.preload('tag').orderBy('created_at', 'desc')
     })
 
     return inertia.render('dashboard', { projects: user.projects })

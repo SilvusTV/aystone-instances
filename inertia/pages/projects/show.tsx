@@ -1,6 +1,7 @@
 import { Head, Link, usePage, router } from '@inertiajs/react'
 import { useState } from 'react'
 import Layout from '@/components/layout'
+import VisitButton from '@/components/VisitButton'
 import { Project, PageProps, User } from '@/types'
 
 interface ProjectShowProps extends PageProps {
@@ -11,6 +12,9 @@ interface ProjectShowProps extends PageProps {
 export default function ProjectShow({ auth, project, users = [] }: ProjectShowProps) {
   const [selectedUserId, setSelectedUserId] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  
+  // Check if user has visiteurPlus role
+  const isVisiteurPlus = auth.user?.role === 'visiteurPlus'
 
   // Filter users based on search term
   const filteredUsers = users.filter(user => 
@@ -55,7 +59,18 @@ export default function ProjectShow({ auth, project, users = [] }: ProjectShowPr
             <h3 className="text-lg font-semibold mb-2">Informations générales</h3>
             <div className="space-y-2">
               <p><span className="font-medium">Nom:</span> {project.name}</p>
-              <p><span className="font-medium">Statut:</span> {project.status === 'en_cours' ? 'En cours' : 'Terminé'}</p>
+              <p>
+                <span className="font-medium">Statut:</span> {project.status === 'en_cours' ? 'En cours' : 'Terminé'}
+                {/* Visit button - only visible for visiteurPlus users */}
+                {isVisiteurPlus && (
+                  <span className="ml-3 inline-block">
+                    <VisitButton 
+                      projectId={project.id} 
+                      isVisited={project.isVisited || false} 
+                    />
+                  </span>
+                )}
+              </p>
               <p><span className="font-medium">Créé par:</span> {project.user?.username}</p>
               <p><span className="font-medium">Catégorie:</span> {project.tag?.name || 'Non catégorisé'}</p>
             </div>

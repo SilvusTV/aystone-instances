@@ -7,6 +7,7 @@ import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import Project from './project.js'
 import Config from './config.js'
 import Instance from './instance.js'
+import UserVisitedProject from './user_visited_project.js'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['username', 'email'],
@@ -27,7 +28,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare password: string
 
   @column()
-  declare role: 'invité' | 'joueur' | 'admin' | 'instanceAdmin'
+  declare role: 'invité' | 'joueur' | 'admin' | 'instanceAdmin' | 'visiteurPlus'
 
   @column()
   declare instanceId: number | null
@@ -59,4 +60,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
     pivotRelatedForeignKey: 'project_id',
   })
   declare collaboratedProjects: ManyToMany<typeof Project>
+
+  @hasMany(() => UserVisitedProject)
+  declare visitedProjects: HasMany<typeof UserVisitedProject>
 }

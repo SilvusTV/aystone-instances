@@ -6,7 +6,7 @@ import s3Service from '#services/s3_service'
 
 export default class AdminController {
   async users({ inertia }: HttpContext) {
-    const users = await User.query().preload('instance').exec()
+    const users = await User.query().preload('instance').orderBy('created_at', 'desc').exec()
     const instances = await Instance.all()
     return inertia.render('admin/users', { users, instances })
   }
@@ -20,7 +20,7 @@ export default class AdminController {
 
     const { role } = request.only(['role'])
 
-    if (!['invité', 'joueur', 'instanceAdmin', 'admin'].includes(role)) {
+    if (!['invité', 'joueur', 'instanceAdmin', 'admin', 'visiteurPlus'].includes(role)) {
       return response.redirect('/admin/users')
     }
 

@@ -183,10 +183,12 @@ export default function AdminUsers({ users = [], instances = [], flash }: AdminU
                     <span className={`px-2 py-1 rounded text-sm ${
                       user.role === 'admin' 
                         ? 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200' 
-                        : user.role === 'instanceAdmin' || user.role === 'admin'
+                        : user.role === 'instanceAdmin'
                         ? 'bg-purple-200 text-purple-800 dark:bg-purple-800 dark:text-purple-200'
                         : user.role === 'joueur'
                         ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200'
+                        : user.role === 'visiteurPlus'
+                        ? 'bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200'
                         : 'bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200'
                     }`}>
                       {user.role}
@@ -205,6 +207,7 @@ export default function AdminUsers({ users = [], instances = [], flash }: AdminU
                       >
                         <option value="invité">Invité</option>
                         <option value="joueur">Joueur</option>
+                        <option value="visiteurPlus">Visiteur Plus</option>
                         <option value="instanceAdmin">Admin d'instance</option>
                         <option value="admin">Admin</option>
                       </select>

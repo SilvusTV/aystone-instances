@@ -3,6 +3,7 @@ import Instance from '#models/instance'
 import Project from '#models/project'
 import User from '#models/user'
 import InstanceDescription from '#models/instance_description'
+import UserVisitedProject from '#models/user_visited_project'
 
 export default class InstancesController {
   async index({ inertia }: HttpContext) {
@@ -15,15 +16,33 @@ export default class InstancesController {
     return inertia.render('instances/show', { instance })
   }
 
-  async projects({ inertia, params }: HttpContext) {
+  async projects({ inertia, params, auth, request }: HttpContext) {
     const instance = await Instance.findByOrFail('name', params.name)
-    const projects = await Project.query()
+    const visitedFilter = request.input('visited', 'all')
+    let projects = await Project.query()
       .where('instance_id', instance.id)
       .preload('user')
       .preload('tag')
+      .orderBy('created_at', 'desc')
       .exec()
 
-    return inertia.render('instances/projects', { instance, projects })
+    // Add visited status to projects if user is authenticated and has visiteurPlus role
+    if (auth.user && auth.user.role === 'visiteurPlus') {
+      // Use the static method to set the isVisited property
+      await Project.setVisitedStatus(projects, auth.user.id)
+
+      // Apply visited filter if specified
+      if (visitedFilter !== 'all') {
+        const isVisited = visitedFilter === 'visited'
+        projects = projects.filter((project) => project.isVisited === isVisited)
+      }
+    }
+
+    return inertia.render('instances/projects', {
+      instance,
+      projects,
+      filters: { visited: visitedFilter },
+    })
   }
 
   async description({ inertia, params, auth }: HttpContext) {
