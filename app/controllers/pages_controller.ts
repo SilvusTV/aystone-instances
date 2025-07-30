@@ -2,13 +2,15 @@ import { HttpContext } from '@adonisjs/core/http'
 import Project from '#models/project'
 import Tag from '#models/tag'
 import Instance from '#models/instance'
+import UserVisitedProject from '#models/user_visited_project'
 
 export default class PagesController {
-  async home({ inertia, request }: HttpContext) {
+  async home({ inertia, request, auth }: HttpContext) {
     const status = request.input('status', 'all')
     const dimension = request.input('dimension', 'all')
     const tagId = request.input('tag_id', 'all')
     const instanceId = request.input('instance_id', 'all')
+    const visitedFilter = request.input('visited', 'all')
 
     let query = Project.query().preload('user').preload('tag').preload('instance')
 
@@ -28,11 +30,31 @@ export default class PagesController {
       query = query.where('instance_id', instanceId)
     }
 
-    const projects = await query.exec()
+    // Sort projects by creation date in descending order (newest first)
+    query = query.orderBy('created_at', 'desc')
+
+    let projects = await query.exec()
     const tags = await Tag.all()
     const instances = await Instance.all()
 
-    return inertia.render('home_new', { projects, tags, instances })
+    // Add visited status to projects if user is authenticated and has visiteurPlus role
+    if (auth.user && auth.user.role === 'visiteurPlus') {
+      // Use the static method to set the isVisited property
+      await Project.setVisitedStatus(projects, auth.user.id)
+
+      // Apply visited filter if specified
+      if (visitedFilter !== 'all') {
+        const isVisited = visitedFilter === 'visited'
+        projects = projects.filter((project) => project.isVisited === isVisited)
+      }
+    }
+
+    return inertia.render('home_new', {
+      projects,
+      tags,
+      instances,
+      filters: { status, dimension, tagId, instanceId, visited: visitedFilter },
+    })
   }
 
   async about({ inertia }: HttpContext) {

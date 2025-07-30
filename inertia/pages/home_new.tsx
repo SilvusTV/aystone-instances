@@ -1,20 +1,34 @@
 import { useState, useEffect } from 'react'
-import { Head, Link } from '@inertiajs/react'
+import { Head, Link, usePage } from '@inertiajs/react'
 import Layout from '@/components/layout'
-import { Project, Tag, Instance } from '@/types'
+import VisitButton from '@/components/VisitButton'
+import TeleportCommand from '@/components/TeleportCommand'
+import { Project, Tag, Instance, PageProps } from '@/types'
 
 interface HomeProps {
   projects: Project[]
   tags: Tag[]
   instances: Instance[]
+  filters?: {
+    status: string
+    dimension: string
+    tagId: string | number
+    instanceId: string | number
+    visited: string
+  }
 }
 
-export default function Home({ projects = [], tags = [], instances = [] }: HomeProps) {
+export default function Home({ projects = [], tags = [], instances = [], filters = { status: 'all', dimension: 'all', tagId: 'all', instanceId: 'all', visited: 'all' } }: HomeProps) {
+  // Get auth from page props
+  const { auth } = usePage<PageProps>().props
+  const isVisiteurPlus = auth.user?.role === 'visiteurPlus'
+
   // Initialize with default values
   const [statusFilter, setStatusFilter] = useState<'all' | 'en_cours' | 'termine'>('all')
   const [dimensionFilter, setDimensionFilter] = useState<'all' | 'overworld' | 'nether' | 'end'>('all')
   const [tagFilter, setTagFilter] = useState<number | 'all'>('all')
   const [instanceFilter, setInstanceFilter] = useState<number | 'all'>('all')
+  const [visitedFilter, setVisitedFilter] = useState<'all' | 'visited' | 'not_visited'>('all')
 
   // Use useEffect to handle browser-only code
   useEffect(() => {
@@ -37,6 +51,11 @@ export default function Home({ projects = [], tags = [], instances = [] }: HomeP
     if (urlParams.get('instance_id')) {
       setInstanceFilter(Number(urlParams.get('instance_id')))
     }
+
+    // Only handle visited filter if user is visiteurPlus
+    if (isVisiteurPlus && urlParams.get('visited')) {
+      setVisitedFilter(urlParams.get('visited') as 'all' | 'visited' | 'not_visited')
+    }
   }, [])
 
   // Function to update URL with filter parameters
@@ -44,7 +63,8 @@ export default function Home({ projects = [], tags = [], instances = [] }: HomeP
     status: 'all' | 'en_cours' | 'termine', 
     dimension: 'all' | 'overworld' | 'nether' | 'end',
     tag: number | 'all',
-    instance: number | 'all'
+    instance: number | 'all',
+    visited: 'all' | 'visited' | 'not_visited' = 'all'
   ) => {
     // Only run this code in the browser
     if (typeof window !== 'undefined') {
@@ -75,6 +95,15 @@ export default function Home({ projects = [], tags = [], instances = [] }: HomeP
         url.searchParams.set('instance_id', instance.toString())
       }
 
+      // Only include visited filter if user is visiteurPlus
+      if (isVisiteurPlus) {
+        if (visited === 'all') {
+          url.searchParams.delete('visited')
+        } else {
+          url.searchParams.set('visited', visited)
+        }
+      }
+
       // Use history API to update the URL without reloading the page
       window.history.pushState({}, '', url.toString())
 
@@ -90,6 +119,13 @@ export default function Home({ projects = [], tags = [], instances = [] }: HomeP
     if (dimensionFilter !== 'all' && project.dimension !== dimensionFilter) return false
     if (tagFilter !== 'all' && project.tagId !== tagFilter) return false
     if (instanceFilter !== 'all' && project.instanceId !== instanceFilter) return false
+    
+    // Only apply visited filter if user is visiteurPlus
+    if (isVisiteurPlus && visitedFilter !== 'all') {
+      const isVisited = visitedFilter === 'visited'
+      if (project.isVisited !== isVisited) return false
+    }
+    
     return true
   })
 
@@ -115,7 +151,7 @@ export default function Home({ projects = [], tags = [], instances = [] }: HomeP
               onChange={(e) => {
                 const newStatus = e.target.value as 'all' | 'en_cours' | 'termine'
                 setStatusFilter(newStatus)
-                updateFilters(newStatus, dimensionFilter, tagFilter, instanceFilter)
+                updateFilters(newStatus, dimensionFilter, tagFilter, instanceFilter, visitedFilter)
               }}
             >
               <option value="all">Tous</option>
@@ -132,7 +168,7 @@ export default function Home({ projects = [], tags = [], instances = [] }: HomeP
               onChange={(e) => {
                 const newDimension = e.target.value as 'all' | 'overworld' | 'nether' | 'end'
                 setDimensionFilter(newDimension)
-                updateFilters(statusFilter, newDimension, tagFilter, instanceFilter)
+                updateFilters(statusFilter, newDimension, tagFilter, instanceFilter, visitedFilter)
               }}
             >
               <option value="all">Toutes</option>
@@ -150,7 +186,7 @@ export default function Home({ projects = [], tags = [], instances = [] }: HomeP
               onChange={(e) => {
                 const newTag = e.target.value === 'all' ? 'all' : Number(e.target.value)
                 setTagFilter(newTag)
-                updateFilters(statusFilter, dimensionFilter, newTag, instanceFilter)
+                updateFilters(statusFilter, dimensionFilter, newTag, instanceFilter, visitedFilter)
               }}
             >
               <option value="all">Tous</option>
@@ -168,7 +204,7 @@ export default function Home({ projects = [], tags = [], instances = [] }: HomeP
               onChange={(e) => {
                 const newInstance = e.target.value === 'all' ? 'all' : Number(e.target.value)
                 setInstanceFilter(newInstance)
-                updateFilters(statusFilter, dimensionFilter, tagFilter, newInstance)
+                updateFilters(statusFilter, dimensionFilter, tagFilter, newInstance, visitedFilter)
               }}
             >
               <option value="all">Toutes</option>
@@ -177,6 +213,26 @@ export default function Home({ projects = [], tags = [], instances = [] }: HomeP
               ))}
             </select>
           </div>
+
+          {/* Visited filter - only visible for visiteurPlus users */}
+          {isVisiteurPlus && (
+            <div className="lg:col-span-4">
+              <label className="block mb-2">Projets visités</label>
+              <select 
+                className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                value={visitedFilter}
+                onChange={(e) => {
+                  const newVisitedFilter = e.target.value as 'all' | 'visited' | 'not_visited'
+                  setVisitedFilter(newVisitedFilter)
+                  updateFilters(statusFilter, dimensionFilter, tagFilter, instanceFilter, newVisitedFilter)
+                }}
+              >
+                <option value="all">Tous les projets</option>
+                <option value="visited">Projets visités</option>
+                <option value="not_visited">Projets non visités</option>
+              </select>
+            </div>
+          )}
         </div>
       </div>
 
@@ -193,6 +249,16 @@ export default function Home({ projects = [], tags = [], instances = [] }: HomeP
                   backgroundColor: project.status === 'en_cours' ? 'rgba(254, 240, 138, 0.8)' : 'rgba(187, 247, 208, 0.8)',
                 }}
               >
+                {/* Visited status tag - only visible for visiteurPlus users */}
+                {isVisiteurPlus && (
+                  <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold z-20 ${
+                    project.isVisited 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                  }`}>
+                    {project.isVisited ? 'visité' : 'non visité'}
+                  </div>
+                )}
                 <div className="relative z-10">
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                     <Link href={`/projects/${project.id}?from=home`} className="text-white hover:text-white hover:underline">
@@ -214,17 +280,38 @@ export default function Home({ projects = [], tags = [], instances = [] }: HomeP
 
                 <div className="mb-4">
                   <span className="font-semibold">Coordonnées:</span> 
-                  <div className="text-sm sm:text-base">X: {project.x}, Y: {project.y}, Z: {project.z}</div>
+                  <div className="text-sm sm:text-base">
+                    {isVisiteurPlus ? (
+                      <TeleportCommand 
+                        x={project.x} 
+                        y={project.y} 
+                        z={project.z} 
+                        dimension={project.dimension} 
+                      />
+                    ) : (
+                      <>X: {project.x}, Y: {project.y}, Z: {project.z}</>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                  <span className={`px-2 py-1 rounded text-sm inline-block ${
-                    project.status === 'en_cours' 
-                      ? 'bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200' 
-                      : 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200'
-                  }`}>
-                    {project.status === 'en_cours' ? 'En cours' : 'Terminé'}
-                  </span>
+                  <div className="flex flex-wrap gap-2 items-center">
+                    <span className={`px-2 py-1 rounded text-sm inline-block ${
+                      project.status === 'en_cours' 
+                        ? 'bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200' 
+                        : 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200'
+                    }`}>
+                      {project.status === 'en_cours' ? 'En cours' : 'Terminé'}
+                    </span>
+                    
+                    {/* Visit button - only visible for visiteurPlus users */}
+                    {isVisiteurPlus && (
+                      <VisitButton 
+                        projectId={project.id} 
+                        isVisited={project.isVisited || false} 
+                      />
+                    )}
+                  </div>
 
                   {project.dynmapUrl && (
                     <a 

@@ -31,6 +31,7 @@ export interface Project {
   tag?: Tag
   instance?: Instance
   collaborators?: User[]
+  isVisited?: boolean
 }
 
 export interface Tag {

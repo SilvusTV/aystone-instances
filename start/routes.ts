@@ -294,6 +294,35 @@ router
   })
   .middleware([middleware.auth(), middleware.player()])
 
+// Project visit routes (for visiteurPlus role)
+router
+  .post('/projects/:id/visit', async (ctx) => {
+    const { default: ProjectVisitsController } = await import('#controllers/project_visits_controller')
+    return new ProjectVisitsController().markAsVisited(ctx)
+  })
+  .middleware([middleware.auth(), middleware.visiteurPlus()])
+
+router
+  .delete('/projects/:id/visit', async (ctx) => {
+    const { default: ProjectVisitsController } = await import('#controllers/project_visits_controller')
+    return new ProjectVisitsController().markAsNotVisited(ctx)
+  })
+  .middleware([middleware.auth(), middleware.visiteurPlus()])
+
+router
+  .get('/projects/:id/visit', async (ctx) => {
+    const { default: ProjectVisitsController } = await import('#controllers/project_visits_controller')
+    return new ProjectVisitsController().getVisitStatus(ctx)
+  })
+  .middleware([middleware.auth()])
+
+router
+  .get('/projects/visited', async (ctx) => {
+    const { default: ProjectVisitsController } = await import('#controllers/project_visits_controller')
+    return new ProjectVisitsController().getVisitedProjects(ctx)
+  })
+  .middleware([middleware.auth()])
+
 // User config routes
 router
   .get('/api/config/:key', async (ctx) => {
