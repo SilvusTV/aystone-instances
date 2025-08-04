@@ -32,6 +32,7 @@ export interface Project {
   instance?: Instance
   collaborators?: User[]
   isVisited?: boolean
+  isPrivate?: boolean
 }
 
 export interface Tag {

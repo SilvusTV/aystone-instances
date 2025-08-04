@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Head, Link, usePage } from '@inertiajs/react'
 import Layout from '@/components/layout'
 import VisitButton from '@/components/VisitButton'
@@ -7,20 +7,64 @@ import { Instance, Project, PageProps } from '@/types'
 interface InstanceProjectsProps {
   instance: Instance
   projects: Project[]
+  filters?: {
+    visited: string
+    privacy: string
+  }
 }
 
-export default function InstanceProjects({ instance, projects = [] }: InstanceProjectsProps) {
+export default function InstanceProjects({ instance, projects = [], filters = { visited: 'all', privacy: 'all' } }: InstanceProjectsProps) {
   // Get auth from page props
   const { auth } = usePage<PageProps>().props
   const isVisiteurPlus = auth.user?.role === 'visiteurPlus'
 
   const [statusFilter, setStatusFilter] = useState<'all' | 'en_cours' | 'termine'>('all')
   const [dimensionFilter, setDimensionFilter] = useState<'all' | 'overworld' | 'nether' | 'end'>('all')
-  const [visitedFilter, setVisitedFilter] = useState<'all' | 'visited' | 'not_visited'>('all')
+  const [visitedFilter, setVisitedFilter] = useState<'all' | 'visited' | 'not_visited'>(filters.visited as 'all' | 'visited' | 'not_visited')
+  const [privacyFilter, setPrivacyFilter] = useState<'all' | 'private' | 'public'>(filters.privacy as 'all' | 'private' | 'public')
+  
+  // Initialize filters from URL parameters
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      // Initialize status filter
+      const statusParam = urlParams.get('status');
+      if (statusParam && ['all', 'en_cours', 'termine'].includes(statusParam)) {
+        setStatusFilter(statusParam as 'all' | 'en_cours' | 'termine');
+      }
+      
+      // Initialize dimension filter
+      const dimensionParam = urlParams.get('dimension');
+      if (dimensionParam && ['all', 'overworld', 'nether', 'end'].includes(dimensionParam)) {
+        setDimensionFilter(dimensionParam as 'all' | 'overworld' | 'nether' | 'end');
+      }
+      
+      // Initialize privacy filter
+      const privacyParam = urlParams.get('privacy');
+      if (privacyParam && ['all', 'private', 'public'].includes(privacyParam)) {
+        setPrivacyFilter(privacyParam as 'all' | 'private' | 'public');
+      }
+      
+      // Initialize visited filter (only if user is visiteurPlus)
+      if (isVisiteurPlus) {
+        const visitedParam = urlParams.get('visited');
+        if (visitedParam && ['all', 'visited', 'not_visited'].includes(visitedParam)) {
+          setVisitedFilter(visitedParam as 'all' | 'visited' | 'not_visited');
+        }
+      }
+    }
+  }, []);
 
   const filteredProjects = projects.filter(project => {
     if (statusFilter !== 'all' && project.status !== statusFilter) return false
     if (dimensionFilter !== 'all' && project.dimension !== dimensionFilter) return false
+    
+    // Apply privacy filter
+    if (privacyFilter !== 'all') {
+      const isPrivate = privacyFilter === 'private'
+      if (project.isPrivate !== isPrivate) return false
+    }
     
     // Only apply visited filter if user is visiteurPlus
     if (isVisiteurPlus && visitedFilter !== 'all') {
@@ -83,12 +127,26 @@ export default function InstanceProjects({ instance, projects = [] }: InstancePr
       <div className="mb-6 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
         <h2 className="text-xl font-semibold mb-4">Filtres</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Privacy filter - highlighted for visibility */}
           <div>
             <label className="block mb-2">Statut</label>
             <select 
               className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              onChange={(e) => {
+                const newStatusFilter = e.target.value as 'all' | 'en_cours' | 'termine';
+                setStatusFilter(newStatusFilter);
+                // Update URL with new filter
+                if (typeof window !== 'undefined') {
+                  const url = new URL(window.location.href);
+                  if (newStatusFilter === 'all') {
+                    url.searchParams.delete('status');
+                  } else {
+                    url.searchParams.set('status', newStatusFilter);
+                  }
+                  window.history.pushState({}, '', url.toString());
+                }
+              }}
             >
               <option value="all">Tous</option>
               <option value="en_cours">En cours</option>
@@ -101,13 +159,58 @@ export default function InstanceProjects({ instance, projects = [] }: InstancePr
             <select 
               className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
               value={dimensionFilter}
-              onChange={(e) => setDimensionFilter(e.target.value as any)}
+              onChange={(e) => {
+                const newDimensionFilter = e.target.value as 'all' | 'overworld' | 'nether' | 'end';
+                setDimensionFilter(newDimensionFilter);
+                // Update URL with new filter
+                if (typeof window !== 'undefined') {
+                  const url = new URL(window.location.href);
+                  if (newDimensionFilter === 'all') {
+                    url.searchParams.delete('dimension');
+                  } else {
+                    url.searchParams.set('dimension', newDimensionFilter);
+                  }
+                  window.history.pushState({}, '', url.toString());
+                }
+              }}
             >
               <option value="all">Toutes</option>
               <option value="overworld">Overworld</option>
               <option value="nether">Nether</option>
               <option value="end">End</option>
             </select>
+          </div>
+
+          <div className="md:col-span-2 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border-2 border-blue-300 dark:border-blue-700 shadow-sm">
+            <label className="block mb-2 font-medium text-blue-800 dark:text-blue-300">
+              <span className="inline-block mr-2">🔒</span>
+              Filtre de visibilité
+            </label>
+            <select 
+              className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 border-blue-300 dark:border-blue-700 focus:ring-blue-500 focus:border-blue-500"
+              value={privacyFilter}
+              onChange={(e) => {
+                const newPrivacyFilter = e.target.value as 'all' | 'private' | 'public';
+                setPrivacyFilter(newPrivacyFilter);
+                // Update URL with new filter
+                if (typeof window !== 'undefined') {
+                  const url = new URL(window.location.href);
+                  if (newPrivacyFilter === 'all') {
+                    url.searchParams.delete('privacy');
+                  } else {
+                    url.searchParams.set('privacy', newPrivacyFilter);
+                  }
+                  window.history.pushState({}, '', url.toString());
+                }
+              }}
+            >
+              <option value="all">Tous les projets</option>
+              <option value="private">Projets privés uniquement</option>
+              <option value="public">Projets publics uniquement</option>
+            </select>
+            <p className="mt-2 text-sm text-blue-600 dark:text-blue-400">
+              Filtrez les projets selon leur visibilité (privé ou public)
+            </p>
           </div>
 
           {/* Visited filter - only visible for visiteurPlus users */}
@@ -117,7 +220,20 @@ export default function InstanceProjects({ instance, projects = [] }: InstancePr
               <select 
                 className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
                 value={visitedFilter}
-                onChange={(e) => setVisitedFilter(e.target.value as any)}
+                onChange={(e) => {
+                  const newVisitedFilter = e.target.value as 'all' | 'visited' | 'not_visited';
+                  setVisitedFilter(newVisitedFilter);
+                  // Update URL with new filter
+                  if (typeof window !== 'undefined') {
+                    const url = new URL(window.location.href);
+                    if (newVisitedFilter === 'all') {
+                      url.searchParams.delete('visited');
+                    } else {
+                      url.searchParams.set('visited', newVisitedFilter);
+                    }
+                    window.history.pushState({}, '', url.toString());
+                  }
+                }}
               >
                 <option value="all">Tous les projets</option>
                 <option value="visited">Projets visités</option>

@@ -22,6 +22,7 @@ export default function EditProject({ project, tags = [], flash }: EditProjectPr
     tag_id: project.tagId.toString(),
     dynmap_url: project.dynmapUrl || '',
     status: project.status,
+    is_private: project.isPrivate || false,
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -282,6 +283,25 @@ export default function EditProject({ project, tags = [], flash }: EditProjectPr
                 )}
                 <p className="text-gray-500 text-sm mt-1">
                   Vous pouvez ajouter un lien direct vers votre projet sur la dynmap.
+                </p>
+              </div>
+
+              <div className="col-span-full">
+                <div className="flex items-center mb-4">
+                  <input
+                    id="is_private"
+                    type="checkbox"
+                    className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    checked={data.is_private}
+                    onChange={(e) => setData('is_private', e.target.checked)}
+                  />
+                  <label htmlFor="is_private" className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                    Projet privé
+                  </label>
+                </div>
+                <p className="text-gray-500 text-sm mb-4">
+                  Si le projet est privé, il ne sera visible que sur la page des projets de votre instance. 
+                  S'il est public, il sera visible sur toutes les instances.
                 </p>
               </div>
 

@@ -53,6 +53,19 @@ export default class ProjectsController {
       query = query.where('tag_id', tagId)
     }
 
+    // Filter private projects - they should only be visible within their specific instance
+    if (auth.user) {
+      // If user is authenticated, show public projects and private projects from user's instance
+      query = query.where((builder) => {
+        builder.where('is_private', false).orWhere((subBuilder) => {
+          subBuilder.where('is_private', true).where('instance_id', auth.user!.instanceId)
+        })
+      })
+    } else {
+      // If user is not authenticated, only show public projects
+      query = query.where('is_private', false)
+    }
+
     // Sort projects by creation date in descending order (newest first)
     query = query.orderBy('created_at', 'desc')
 
@@ -103,6 +116,7 @@ export default class ProjectsController {
       'tag_id',
       'dynmap_url',
       'collaborators',
+      'is_private',
     ])
 
     // Create the project
@@ -120,6 +134,7 @@ export default class ProjectsController {
       complementary_z: data.complementary_z || null,
       tagId: data.tag_id,
       dynmapUrl: data.dynmap_url || null,
+      isPrivate: data.is_private === 'true' || data.is_private === true,
       status: 'en_cours',
     })
 
@@ -178,6 +193,7 @@ export default class ProjectsController {
       'tag_id',
       'dynmap_url',
       'status',
+      'is_private',
     ])
 
     // Store the original status before updating
@@ -195,6 +211,7 @@ export default class ProjectsController {
     project.tagId = data.tag_id
     project.dynmapUrl = data.dynmap_url || null
     project.status = data.status
+    project.isPrivate = data.is_private === 'true' || data.is_private === true
 
     await project.save()
 

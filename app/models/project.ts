@@ -33,6 +33,9 @@ export default class Project extends BaseModel {
 
   @column()
   declare z: number
+  
+  @column()
+  declare isPrivate: boolean
 
   @column()
   declare complementary_x: number | null
