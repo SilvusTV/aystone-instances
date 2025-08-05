@@ -260,7 +260,7 @@ export default function InstanceProjects({ instance, projects = [], filters = { 
                   </div>
                 )}
                 <h3 className="text-xl font-bold">
-                  <Link href={`/projects/${project.id}?from=instance_projects&instance=${instance.name}`} className="text-white hover:text-white hover:underline">
+                  <Link href={`/projects/${project.id}?from=instance_projects&instance=${instance.name}`} className="text-gray-900 dark:text-white hover:text-gray-900 dark:hover:text-white hover:underline">
                     {project.name}
                   </Link>
                 </h3>
@@ -270,7 +270,7 @@ export default function InstanceProjects({ instance, projects = [], filters = { 
               </div>
 
               <div className="p-4">
-                <p className="mb-4">{project.description.substring(0, 100)}...</p>
+                <p className="mb-4">{project.description.length > 100 ? `${project.description.substring(0, 100)}...` : project.description}</p>
 
                 <div className="mb-4">
                   <div><span className="font-semibold">Coordonnées:</span> X: {project.x}, Y: {project.y}, Z: {project.z}</div>
