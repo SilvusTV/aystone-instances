@@ -30,6 +30,19 @@ export default class PagesController {
       query = query.where('instance_id', instanceId)
     }
 
+    // Filter private projects - they should only be visible within their specific instance
+    if (auth.user) {
+      // If user is authenticated, show public projects and private projects from user's instance
+      query = query.where((builder) => {
+        builder.where('is_private', false).orWhere((subBuilder) => {
+          subBuilder.where('is_private', true).where('instance_id', auth.user!.instanceId)
+        })
+      })
+    } else {
+      // If user is not authenticated, only show public projects
+      query = query.where('is_private', false)
+    }
+
     // Sort projects by creation date in descending order (newest first)
     query = query.orderBy('created_at', 'desc')
 

@@ -46,14 +46,14 @@ export default class AdminController {
     const user = await User.find(params.id)
 
     if (!user) {
-      session.flash('error', 'Utilisateur non trouvé')
+      session?.flash('error', 'Utilisateur non trouvé')
       return response.redirect('/admin/users')
     }
 
     const { password } = request.only(['password'])
 
     if (!password || password.length < 6) {
-      session.flash('error', 'Le mot de passe doit contenir au moins 6 caractères')
+      session?.flash('error', 'Le mot de passe doit contenir au moins 6 caractères')
       return response.redirect('/admin/users')
     }
 
@@ -61,7 +61,7 @@ export default class AdminController {
     user.password = await hash.use('scrypt').make(password)
     await user.save()
 
-    session.flash('success', `Mot de passe réinitialisé pour ${user.username}`)
+    session?.flash('success', `Mot de passe réinitialisé pour ${user.username}`)
     return response.redirect('/admin/users')
   }
 
@@ -69,7 +69,7 @@ export default class AdminController {
     const user = await User.find(params.id)
 
     if (!user) {
-      session.flash('error', 'Utilisateur non trouvé')
+      session?.flash('error', 'Utilisateur non trouvé')
       return response.redirect('/admin/users')
     }
 
@@ -98,7 +98,7 @@ export default class AdminController {
     user.instanceId = parsedInstanceId
     await user.save()
 
-    session.flash('success', `Instance de ${user.username} mise à jour avec succès`)
+    session?.flash('success', `Instance de ${user.username} mise à jour avec succès`)
     return response.redirect('/admin/users')
   }
 
@@ -111,24 +111,24 @@ export default class AdminController {
     const { name } = request.only(['name'])
 
     if (!name || name.trim() === '') {
-      session.flash('error', "Le nom de l'instance est requis")
+      session?.flash('error', "Le nom de l'instance est requis")
       return response.redirect('/admin/instances')
     }
 
     // Check if instance with this name already exists
     const existingInstance = await Instance.findBy('name', name)
     if (existingInstance) {
-      session.flash('error', 'Une instance avec ce nom existe déjà')
+      session?.flash('error', 'Une instance avec ce nom existe déjà')
       return response.redirect('/admin/instances')
     }
 
     try {
       // Create the instance
       await Instance.create({ name })
-      session.flash('success', `Instance "${name}" créée avec succès`)
+      session?.flash('success', `Instance "${name}" créée avec succès`)
     } catch (error) {
       console.error('Error creating instance:', error)
-      session.flash('error', "Erreur lors de la création de l'instance")
+      session?.flash('error', "Erreur lors de la création de l'instance")
     }
 
     return response.redirect('/admin/instances')
@@ -138,7 +138,7 @@ export default class AdminController {
     const instance = await Instance.find(params.id)
 
     if (!instance) {
-      session.flash('error', 'Instance non trouvée')
+      session?.flash('error', 'Instance non trouvée')
       return response.redirect('/admin/instances')
     }
 
@@ -149,12 +149,12 @@ export default class AdminController {
     })
 
     if (!image) {
-      session.flash('error', 'Aucune image fournie')
+      session?.flash('error', 'Aucune image fournie')
       return response.redirect('/admin/instances')
     }
 
     if (!image.isValid) {
-      session.flash('error', `Erreur lors de l'upload de l'image: ${image.errors.join(', ')}`)
+      session?.flash('error', `Erreur lors de l'upload de l'image: ${image.errors.join(', ')}`)
       return response.redirect('/admin/instances')
     }
 
@@ -207,10 +207,10 @@ export default class AdminController {
       instance.image = imageUrl
       await instance.save()
 
-      session.flash('success', `Image de l'instance "${instance.name}" mise à jour avec succès`)
+      session?.flash('success', `Image de l'instance "${instance.name}" mise à jour avec succès`)
     } catch (error) {
       console.error('Error updating instance image:', error)
-      session.flash('error', "Erreur lors de la mise à jour de l'image de l'instance")
+      session?.flash('error', "Erreur lors de la mise à jour de l'image de l'instance")
     }
 
     return response.redirect('/admin/instances')

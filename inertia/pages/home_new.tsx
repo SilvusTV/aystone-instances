@@ -3,7 +3,15 @@ import { Head, Link, usePage } from '@inertiajs/react'
 import Layout from '@/components/layout'
 import VisitButton from '@/components/VisitButton'
 import TeleportCommand from '@/components/TeleportCommand'
+import ToastDemo from '@/components/ToastDemo'
 import { Project, Tag, Instance, PageProps } from '@/types'
+
+// Helper function to capitalize dimension names
+const formatDimension = (dimension: string): string => {
+  if (dimension === 'overworld') return 'Overworld'
+  if (dimension === 'nether') return 'Nether'
+  return dimension.charAt(0).toUpperCase() + dimension.slice(1) // For other dimensions like 'end'
+}
 
 interface HomeProps {
   projects: Project[]
@@ -266,7 +274,7 @@ export default function Home({ projects = [], tags = [], instances = [], filters
                     </Link>
                   </h3>
                   <p className="text-sm text-gray-800 dark:text-white">
-                    Par {project.user?.username} • {project.dimension} • {project.tag?.label}
+                    Par {project.user?.username} • {formatDimension(project.dimension)} • {project.tag?.label}
                   </p>
                   <p className="text-sm text-gray-800 dark:text-white mt-1">
                     Instance: {project.instance?.name || 'Non spécifiée'}
@@ -276,7 +284,7 @@ export default function Home({ projects = [], tags = [], instances = [], filters
               </div>
 
               <div className="p-4">
-                <p className="mb-4">{project.description.substring(0, 100)}...</p>
+                <p className="mb-4">{project.description.length > 100 ? `${project.description.substring(0, 100)}...` : project.description}</p>
 
                 <div className="mb-4">
                   <span className="font-semibold">Coordonnées:</span> 

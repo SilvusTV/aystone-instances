@@ -19,12 +19,21 @@ export default class InstancesController {
   async projects({ inertia, params, auth, request }: HttpContext) {
     const instance = await Instance.findByOrFail('name', params.name)
     const visitedFilter = request.input('visited', 'all')
-    let projects = await Project.query()
+    const privacyFilter = request.input('privacy', 'all')
+
+    let query = Project.query()
       .where('instance_id', instance.id)
       .preload('user')
       .preload('tag')
       .orderBy('created_at', 'desc')
-      .exec()
+
+    // Apply privacy filter if specified
+    if (privacyFilter !== 'all') {
+      const isPrivate = privacyFilter === 'private'
+      query = query.where('is_private', isPrivate)
+    }
+
+    let projects = await query.exec()
 
     // Add visited status to projects if user is authenticated and has visiteurPlus role
     if (auth.user && auth.user.role === 'visiteurPlus') {
@@ -41,7 +50,7 @@ export default class InstancesController {
     return inertia.render('instances/projects', {
       instance,
       projects,
-      filters: { visited: visitedFilter },
+      filters: { visited: visitedFilter, privacy: privacyFilter },
     })
   }
 
@@ -77,11 +86,11 @@ export default class InstancesController {
         content,
       })
 
-      session.flash('success', 'Description mise à jour avec succès')
+      session?.flash('success', 'Description mise à jour avec succès')
       return response.redirect(`/instances/${instance.name}/description`)
     } catch (error) {
       console.error('Error updating instance description:', error)
-      session.flash('error', 'Erreur lors de la mise à jour de la description')
+      session?.flash('error', 'Erreur lors de la mise à jour de la description')
       return response.redirect().back()
     }
   }

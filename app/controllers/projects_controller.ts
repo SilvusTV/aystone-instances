@@ -2,6 +2,7 @@ import Project from '#models/project'
 import Tag from '#models/tag'
 import User from '#models/user'
 import UserVisitedProject from '#models/user_visited_project'
+import ProjectRating from '#models/project_rating'
 import { HttpContext } from '@adonisjs/core/http'
 
 export default class ProjectsController {
@@ -31,7 +32,26 @@ export default class ProjectsController {
       await Project.setVisitedStatus(project, auth.user.id)
     }
 
-    return inertia.render('projects/show', { project, users })
+    // Calculate and set the average rating for the project
+    await Project.setAverageRatings(project)
+
+    // Determine if the current user can rate this project
+    let canRate = false
+    if (auth.user) {
+      // User can rate if:
+      // 1. They are in the same instance as the project
+      // 2. They are not the creator of the project
+      // 3. They are not a collaborator on the project
+      canRate = auth.user.instanceId === project.instanceId && 
+                auth.user.id !== project.userId &&
+                !project.collaborators?.some(collaborator => collaborator.id === auth.user!.id)
+      
+      // Set the user's rating for the project regardless of whether they can rate it
+      // This ensures users can see their previous ratings even if they can no longer rate
+      await Project.setUserRating(project, auth.user.id)
+    }
+
+    return inertia.render('projects/show', { project, users, canRate })
   }
   async index({ inertia, request, auth }: HttpContext) {
     const status = request.input('status', 'all')
@@ -53,6 +73,19 @@ export default class ProjectsController {
       query = query.where('tag_id', tagId)
     }
 
+    // Filter private projects - they should only be visible within their specific instance
+    if (auth.user) {
+      // If user is authenticated, show public projects and private projects from user's instance
+      query = query.where((builder) => {
+        builder.where('is_private', false).orWhere((subBuilder) => {
+          subBuilder.where('is_private', true).where('instance_id', auth.user!.instanceId)
+        })
+      })
+    } else {
+      // If user is not authenticated, only show public projects
+      query = query.where('is_private', false)
+    }
+
     // Sort projects by creation date in descending order (newest first)
     query = query.orderBy('created_at', 'desc')
 
@@ -70,6 +103,9 @@ export default class ProjectsController {
         projects = projects.filter((project) => project.isVisited === isVisited)
       }
     }
+    
+    // Calculate and set the average rating for all projects
+    await Project.setAverageRatings(projects)
 
     return inertia.render('projects/index', {
       projects,
@@ -103,6 +139,7 @@ export default class ProjectsController {
       'tag_id',
       'dynmap_url',
       'collaborators',
+      'is_private',
     ])
 
     // Create the project
@@ -120,6 +157,7 @@ export default class ProjectsController {
       complementary_z: data.complementary_z || null,
       tagId: data.tag_id,
       dynmapUrl: data.dynmap_url || null,
+      isPrivate: data.is_private === 'true' || data.is_private === true,
       status: 'en_cours',
     })
 
@@ -178,6 +216,7 @@ export default class ProjectsController {
       'tag_id',
       'dynmap_url',
       'status',
+      'is_private',
     ])
 
     // Store the original status before updating
@@ -195,6 +234,7 @@ export default class ProjectsController {
     project.tagId = data.tag_id
     project.dynmapUrl = data.dynmap_url || null
     project.status = data.status
+    project.isPrivate = data.is_private === 'true' || data.is_private === true
 
     await project.save()
 
