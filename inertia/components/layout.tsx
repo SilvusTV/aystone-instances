@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, usePage } from '@inertiajs/react'
 import { PageProps } from '@/types'
+import ToastContainer from './ToastContainer'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -398,6 +399,9 @@ export default function Layout({ children }: LayoutProps) {
             <p>Fait avec ❤️(Kaka) par Silvus_TV</p>
           </div>
         </footer>
+        
+        {/* Toast Container for notifications */}
+        <ToastContainer />
       </div>
     </div>
   )

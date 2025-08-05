@@ -294,6 +294,14 @@ router
   })
   .middleware([middleware.auth(), middleware.player()])
 
+// Project ratings routes
+router
+  .post('/projects/:id/ratings', async (ctx) => {
+    const { default: ProjectRatingsController } = await import('#controllers/project_ratings_controller')
+    return new ProjectRatingsController().store(ctx)
+  })
+  .middleware([middleware.auth()])
+
 // Project visit routes (for visiteurPlus role)
 router
   .post('/projects/:id/visit', async (ctx) => {

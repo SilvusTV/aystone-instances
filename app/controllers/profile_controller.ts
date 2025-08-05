@@ -19,7 +19,7 @@ export default class ProfileController {
 
   async updateEmail({ request, response, auth, session }: HttpContext) {
     if (!auth.user) {
-      session.flash('error', 'Vous devez être connecté pour modifier votre email')
+      session?.flash('error', 'Vous devez être connecté pour modifier votre email')
       return response.redirect('/profile')
     }
 
@@ -28,7 +28,7 @@ export default class ProfileController {
 
     // Validate email
     if (!email || !email.includes('@')) {
-      session.flash('error', 'Email invalide')
+      session?.flash('error', 'Email invalide')
       return response.redirect('/profile')
     }
 
@@ -36,13 +36,13 @@ export default class ProfileController {
     user.email = email
     await user.save()
 
-    session.flash('success', 'Email mis à jour avec succès')
+    session?.flash('success', 'Email mis à jour avec succès')
     return response.redirect('/profile')
   }
 
   async updatePassword({ request, response, auth, session }: HttpContext) {
     if (!auth.user) {
-      session.flash('error', 'Vous devez être connecté pour modifier votre mot de passe')
+      session?.flash('error', 'Vous devez être connecté pour modifier votre mot de passe')
       return response.redirect('/profile')
     }
 
@@ -56,24 +56,24 @@ export default class ProfileController {
 
     // Validate passwords
     if (!currentPassword || !password || !passwordConfirmation) {
-      session.flash('error', 'Tous les champs sont requis')
+      session?.flash('error', 'Tous les champs sont requis')
       return response.redirect('/profile')
     }
 
     if (password !== passwordConfirmation) {
-      session.flash('error', 'Les mots de passe ne correspondent pas')
+      session?.flash('error', 'Les mots de passe ne correspondent pas')
       return response.redirect('/profile')
     }
 
     if (password.length < 6) {
-      session.flash('error', 'Le mot de passe doit contenir au moins 6 caractères')
+      session?.flash('error', 'Le mot de passe doit contenir au moins 6 caractères')
       return response.redirect('/profile')
     }
 
     // Verify current password
     const isPasswordValid = await hash.use('scrypt').verify(user.password, currentPassword)
     if (!isPasswordValid) {
-      session.flash('error', 'Mot de passe actuel incorrect')
+      session?.flash('error', 'Mot de passe actuel incorrect')
       return response.redirect('/profile')
     }
 
@@ -81,13 +81,13 @@ export default class ProfileController {
     user.password = await hash.use('scrypt').make(password)
     await user.save()
 
-    session.flash('success', 'Mot de passe mis à jour avec succès')
+    session?.flash('success', 'Mot de passe mis à jour avec succès')
     return response.redirect('/profile')
   }
 
   async deleteAccount({ response, auth, session }: HttpContext) {
     if (!auth.user) {
-      session.flash('error', 'Vous devez être connecté pour supprimer votre compte')
+      session?.flash('error', 'Vous devez être connecté pour supprimer votre compte')
       return response.redirect('/profile')
     }
 
@@ -99,7 +99,7 @@ export default class ProfileController {
     // Logout the user
     await auth.use('web').logout()
 
-    session.flash('success', 'Votre compte a été supprimé avec succès')
+    session?.flash('success', 'Votre compte a été supprimé avec succès')
     return response.redirect('/')
   }
 }

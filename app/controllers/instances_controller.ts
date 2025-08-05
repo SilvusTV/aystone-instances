@@ -86,11 +86,11 @@ export default class InstancesController {
         content,
       })
 
-      session.flash('success', 'Description mise à jour avec succès')
+      session?.flash('success', 'Description mise à jour avec succès')
       return response.redirect(`/instances/${instance.name}/description`)
     } catch (error) {
       console.error('Error updating instance description:', error)
-      session.flash('error', 'Erreur lors de la mise à jour de la description')
+      session?.flash('error', 'Erreur lors de la mise à jour de la description')
       return response.redirect().back()
     }
   }

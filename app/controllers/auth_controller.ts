@@ -24,7 +24,7 @@ export default class AuthController {
       const user = await query.first()
 
       if (!user) {
-        session.flash('error', 'Utilisateur non trouvé')
+        session?.flash('error', 'Utilisateur non trouvé')
         return response.redirect().withQs().back()
       }
 
@@ -32,12 +32,12 @@ export default class AuthController {
         const isPasswordValid = await hash.verify(user.password, password)
 
         if (!isPasswordValid) {
-          session.flash('error', 'Mot de passe incorrect')
+          session?.flash('error', 'Mot de passe incorrect')
           return response.redirect().withQs().back()
         }
       } catch (verifyError) {
         console.error('Erreur vérification mot de passe:', verifyError)
-        session.flash('error', 'Erreur lors de la vérification du mot de passe')
+        session?.flash('error', 'Erreur lors de la vérification du mot de passe')
         return response.redirect().withQs().back()
       }
 
@@ -45,7 +45,7 @@ export default class AuthController {
       return response.redirect('/')
     } catch (error) {
       console.error('Erreur connexion:', error)
-      session.flash('error', 'Erreur lors de la connexion')
+      session?.flash('error', 'Erreur lors de la connexion')
       return response.redirect().withQs().back()
     }
   }
@@ -65,13 +65,13 @@ export default class AuthController {
     ])
 
     if (data.password !== data.password_confirmation) {
-      session.flash('error', 'Les mots de passe ne correspondent pas')
+      session?.flash('error', 'Les mots de passe ne correspondent pas')
       return response.redirect('/register')
     }
 
     const existingUser = await User.findBy('username', data.username)
     if (existingUser) {
-      session.flash('error', 'Ce pseudo est déjà utilisé')
+      session?.flash('error', 'Ce pseudo est déjà utilisé')
       return response.redirect('/register')
     }
 
@@ -88,7 +88,7 @@ export default class AuthController {
       return response.redirect('/')
     } catch (error) {
       console.error('Erreur inscription:', error)
-      session.flash('error', "Erreur lors de l'inscription")
+      session?.flash('error', "Erreur lors de l'inscription")
       return response.redirect('/register')
     }
   }
@@ -110,7 +110,7 @@ export default class AuthController {
       .first()
 
     if (!user) {
-      session.flash('success', 'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.')
+      session?.flash('success', 'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.')
       return response.redirect().back()
     }
 
@@ -126,7 +126,7 @@ export default class AuthController {
 
     await mail.send(new PasswordResetMail(user.username, resetToken, resetUrl, user.email!))
 
-    session.flash('success', 'Un email de réinitialisation a été envoyé à votre adresse email.')
+    session?.flash('success', 'Un email de réinitialisation a été envoyé à votre adresse email.')
     return response.redirect().back()
   }
 
@@ -135,7 +135,7 @@ export default class AuthController {
       const { token } = request.qs()
 
       if (!token) {
-        session.flash('error', 'Token de réinitialisation manquant.')
+        session?.flash('error', 'Token de réinitialisation manquant.')
         return response.redirect('/forgot-password')
       }
 
@@ -146,7 +146,7 @@ export default class AuthController {
       return inertia.render('auth/reset-password', { token })
     } catch (error) {
       console.error('Erreur dans showResetPassword:', error)
-      session.flash('error', 'Une erreur est survenue lors du traitement de votre demande.')
+      session?.flash('error', 'Une erreur est survenue lors du traitement de votre demande.')
       return response.redirect('/forgot-password')
     }
   }
@@ -159,17 +159,17 @@ export default class AuthController {
     ])
 
     if (!token) {
-      session.flash('error', 'Token de réinitialisation manquant.')
+      session?.flash('error', 'Token de réinitialisation manquant.')
       return response.redirect('/forgot-password')
     }
 
     if (password !== passwordConfirmation) {
-      session.flash('error', 'Les mots de passe ne correspondent pas.')
+      session?.flash('error', 'Les mots de passe ne correspondent pas.')
       return response.redirect().withQs().back()
     }
 
     if (password.length < 6) {
-      session.flash('error', 'Le mot de passe doit contenir au moins 6 caractères.')
+      session?.flash('error', 'Le mot de passe doit contenir au moins 6 caractères.')
       return response.redirect().withQs().back()
     }
 
@@ -178,7 +178,7 @@ export default class AuthController {
       .first()
 
     if (!user || !user.resetTokenExpiresAt || user.resetTokenExpiresAt < DateTime.now()) {
-      session.flash('error', 'Le lien de réinitialisation est invalide ou a expiré.')
+      session?.flash('error', 'Le lien de réinitialisation est invalide ou a expiré.')
       return response.redirect('/forgot-password')
     }
 
@@ -187,7 +187,7 @@ export default class AuthController {
     user.resetTokenExpiresAt = null
     await user.save()
 
-    session.flash('success', 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.')
+    session?.flash('success', 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.')
     return response.redirect('/login')
   }
 }

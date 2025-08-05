@@ -3,6 +3,7 @@ import { Head, Link, usePage } from '@inertiajs/react'
 import Layout from '@/components/layout'
 import VisitButton from '@/components/VisitButton'
 import TeleportCommand from '@/components/TeleportCommand'
+import ToastDemo from '@/components/ToastDemo'
 import { Project, Tag, Instance, PageProps } from '@/types'
 
 interface HomeProps {
@@ -332,6 +333,12 @@ export default function Home({ projects = [], tags = [], instances = [], filters
             <p className="text-xl text-gray-500 dark:text-gray-400">Aucun projet ne correspond à vos critères de recherche.</p>
           </div>
         )}
+      </div>
+
+      {/* Toast Demo Section */}
+      <div className="mt-12">
+        <h2 className="text-2xl font-bold mb-6">Système de Notifications</h2>
+        <ToastDemo />
       </div>
     </Layout>
   )

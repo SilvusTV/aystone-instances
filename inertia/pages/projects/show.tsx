@@ -2,14 +2,16 @@ import { Head, Link, usePage, router } from '@inertiajs/react'
 import { useState } from 'react'
 import Layout from '@/components/layout'
 import VisitButton from '@/components/VisitButton'
+import RatingComponent from '@/components/RatingComponent'
 import { Project, PageProps, User } from '@/types'
 
 interface ProjectShowProps extends PageProps {
   project: Project
   users?: User[]
+  canRate?: boolean
 }
 
-export default function ProjectShow({ auth, project, users = [] }: ProjectShowProps) {
+export default function ProjectShow({ auth, project, users = [], canRate = false }: ProjectShowProps) {
   const [selectedUserId, setSelectedUserId] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   
@@ -91,6 +93,15 @@ export default function ProjectShow({ auth, project, users = [] }: ProjectShowPr
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-2">Description</h3>
           <p className="whitespace-pre-wrap">{project.description}</p>
+        </div>
+
+        <div className="mb-6">
+          <RatingComponent 
+            projectId={project.id} 
+            averageRating={project.averageRating} 
+            canRate={canRate}
+            userRating={project.userRating}
+          />
         </div>
 
         {(project.collaborators && project.collaborators.length > 0) || (auth.user && (auth.user.id === project.userId || auth.user.role === 'admin') && users.length > 0) ? (
