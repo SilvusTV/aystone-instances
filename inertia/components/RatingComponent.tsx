@@ -46,12 +46,30 @@ export default function RatingComponent({ projectId, averageRating, canRate, use
 
   // Render stars for the average rating (read-only)
   const renderAverageRating = () => {
+    // Convert averageRating to a number if it's a string
+    const rating = typeof averageRating === 'string' 
+      ? parseFloat(averageRating) 
+      : averageRating;
+    
+    // Check if rating is a valid number (not null, undefined, or NaN)
+    const isValidRating = rating !== null && rating !== undefined && !isNaN(rating);
+    
+    // Debug: Log the rating information
+    console.log(`DEBUG: RatingComponent for project ${projectId}:`, {
+      originalRating: averageRating,
+      convertedRating: rating,
+      isNull: rating === null,
+      isUndefined: rating === undefined,
+      isNaN: isNaN(rating),
+      isValidRating: isValidRating
+    });
+    
     return (
       <div className="flex items-center">
         <div className="flex">
           {[1, 2, 3, 4, 5].map((star) => {
             // Determine if this star should be highlighted based on average rating
-            const isRatedStar = averageRating !== null && star <= averageRating;
+            const isRatedStar = isValidRating && star <= rating;
             
             // Apply styling to make the average rating visually distinct from user rating
             let starClass = 'w-5 h-5 ';
@@ -78,7 +96,7 @@ export default function RatingComponent({ projectId, averageRating, canRate, use
           })}
         </div>
         <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-          {averageRating ? `${averageRating.toFixed(1)}/5` : 'Aucune note'}
+          {isValidRating ? `${rating.toFixed(1)}/5` : 'Aucune note'}
         </span>
         <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">(moyenne de tous les utilisateurs)</span>
       </div>

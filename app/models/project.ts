@@ -139,11 +139,18 @@ export default class Project extends BaseModel {
 
     // Get all project IDs
     const projectIds = projects.map((project) => project.id)
+    console.log('DEBUG: Project IDs for rating calculation:', projectIds)
 
     // Get all ratings for these projects
-    const ratings = await ProjectRating.query()
-      .whereIn('projectId', projectIds)
-      .exec()
+    const ratings = await ProjectRating.query().whereIn('projectId', projectIds).exec()
+    console.log('DEBUG: Found ratings:', ratings.length)
+    
+    // Log each rating for debugging
+    ratings.forEach((rating) => {
+      console.log(
+        `DEBUG: Rating - Project ID: ${rating.projectId}, User ID: ${rating.userId}, Rating: ${rating.rating}`
+      )
+    })
 
     // Group ratings by project ID
     const ratingsByProject = new Map<number, number[]>()
@@ -157,11 +164,20 @@ export default class Project extends BaseModel {
     // Calculate average rating for each project
     projects.forEach((project) => {
       const projectRatings = ratingsByProject.get(project.id) || []
+      console.log(
+        `DEBUG: Project ${project.id} (${project.name}) has ${projectRatings.length} ratings`
+      )
+      
       if (projectRatings.length > 0) {
         const sum = projectRatings.reduce((acc, rating) => acc + rating, 0)
-        project.averageRating = Number.parseFloat((sum / projectRatings.length).toFixed(1))
+        const average = Number.parseFloat((sum / projectRatings.length).toFixed(1))
+        project.averageRating = average
+        console.log(
+          `DEBUG: Project ${project.id} average rating calculated: ${average} (sum: ${sum}, count: ${projectRatings.length})`
+        )
       } else {
         project.averageRating = null
+        console.log(`DEBUG: Project ${project.id} has no ratings, setting averageRating to null`)
       }
     })
   }

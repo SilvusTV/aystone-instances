@@ -58,6 +58,7 @@ export default class ProjectsController {
     const dimension = request.input('dimension', 'all')
     const tagId = request.input('tag_id', 'all')
     const visitedFilter = request.input('visited', 'all')
+    const sortOrder = request.input('sort', 'name_asc') // Default to alphabetical order
 
     let query = Project.query().preload('user').preload('tag')
 
@@ -86,8 +87,23 @@ export default class ProjectsController {
       query = query.where('is_private', false)
     }
 
-    // Sort projects by creation date in descending order (newest first)
-    query = query.orderBy('created_at', 'desc')
+    // Apply sorting based on the sort parameter
+    switch (sortOrder) {
+      case 'name_asc':
+        query = query.orderBy('name', 'asc')
+        break
+      case 'name_desc':
+        query = query.orderBy('name', 'desc')
+        break
+      case 'date_desc':
+        query = query.orderBy('created_at', 'desc')
+        break
+      case 'date_asc':
+        query = query.orderBy('created_at', 'asc')
+        break
+      default:
+        query = query.orderBy('name', 'asc') // Default to alphabetical order
+    }
 
     let projects = await query.exec()
     const tags = await Tag.all()

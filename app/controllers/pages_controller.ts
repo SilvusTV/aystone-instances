@@ -62,6 +62,9 @@ export default class PagesController {
       }
     }
 
+    // Calculate and set the average rating for all projects
+    await Project.setAverageRatings(projects)
+
     return inertia.render('home_new', {
       projects,
       tags,

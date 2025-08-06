@@ -32,15 +32,22 @@ export default function ProjectShow({ auth, project, users = [], canRate = false
     user.id !== project.userId && 
     !project.collaborators?.some(collaborator => collaborator.id === user.id)
   )
-  const searchParams = new URLSearchParams(window.location.search);
-  const from = searchParams.get('from');
-  const instance = searchParams.get('instance');
+  // Safely access window object only in browser environment
+  let from = null;
+  let instance = null;
+  
+  // Only run this code in the browser
+  if (typeof window !== 'undefined') {
+    const searchParams = new URLSearchParams(window.location.search);
+    from = searchParams.get('from');
+    instance = searchParams.get('instance');
+  }
 
   // Determine the return URL and text based on the 'from' parameter
   let returnUrl = '/dashboard';
   let returnText = 'Retour au tableau de bord';
   if (from === 'home') {
-    returnUrl = '/';
+    returnUrl = '#';
     returnText = 'Retour à l\'accueil';
   } else if (from === 'instance_projects' && instance) {
     returnUrl = `/instances/${instance}/projects`;
@@ -54,9 +61,37 @@ export default function ProjectShow({ auth, project, users = [], canRate = false
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Projet: {project.name}</h1>
         <div className="flex justify-between items-center mb-4">
-          <Link href={returnUrl} className="text-primary-600 hover:text-primary-800 dark:text-primary-400">
-            &larr; {returnText}
-          </Link>
+          {from === 'home' ? (
+            <button 
+              onClick={() => {
+                // Safely access window.history only in browser environment
+                if (typeof window !== 'undefined') {
+                  // Try to navigate back
+                  const currentHref = window.location.href;
+                  
+                  // Attempt to go back
+                  window.history.back();
+                  
+                  // Check if navigation worked by setting a timeout
+                  setTimeout(() => {
+                    // If we're still on the same page after trying to go back,
+                    // it means there was no history entry to go back to
+                    if (window.location.href === currentHref) {
+                      // Fallback to home page
+                      router.visit('/');
+                    }
+                  }, 100);
+                }
+              }} 
+              className="text-primary-600 hover:text-primary-800 dark:text-primary-400"
+            >
+              &larr; {returnText}
+            </button>
+          ) : (
+            <Link href={returnUrl} className="text-primary-600 hover:text-primary-800 dark:text-primary-400">
+              &larr; {returnText}
+            </Link>
+          )}
         </div>
       </div>
 
