@@ -14,7 +14,9 @@ export default class AuthController {
   }
 
   async login({ request, response, auth, session }: HttpContext) {
-    const { uid, password } = request.only(['uid', 'password'])
+    const { uid, password, remember } = request.only(['uid', 'password', 'remember'])
+    // Convert remember to boolean to ensure compatibility with auth.use('web').login()
+    const rememberMe = remember === true || remember === 'true' || remember === '1'
 
     try {
       const query = User.query()
@@ -41,7 +43,7 @@ export default class AuthController {
         return response.redirect().withQs().back()
       }
 
-      await auth.use('web').login(user)
+      await auth.use('web').login(user, rememberMe)
       return response.redirect('/')
     } catch (error) {
       console.error('Erreur connexion:', error)

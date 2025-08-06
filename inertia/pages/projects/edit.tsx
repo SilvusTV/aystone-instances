@@ -1,14 +1,18 @@
-import React from 'react'
-import { Head, useForm } from '@inertiajs/react'
+import React, { useState } from 'react'
+import { Head, useForm, router } from '@inertiajs/react'
 import Layout from '@/components/layout'
-import { Project, Tag, PageProps } from '@/types'
+import { Project, Tag, PageProps, User } from '@/types'
 
 interface EditProjectProps extends PageProps {
   project: Project
   tags: Tag[]
+  users?: User[]
 }
 
-export default function EditProject({ project, tags = [], flash }: EditProjectProps) {
+export default function EditProject({ project, tags = [], users = [], flash, auth }: EditProjectProps) {
+  const [selectedUserId, setSelectedUserId] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+  
   const { data, setData, post, processing, errors } = useForm({
     name: project.name,
     description: project.description,
@@ -19,11 +23,19 @@ export default function EditProject({ project, tags = [], flash }: EditProjectPr
     complementary_x: project.complementary_x ? project.complementary_x.toString() : '',
     complementary_y: project.complementary_y ? project.complementary_y.toString() : '',
     complementary_z: project.complementary_z ? project.complementary_z.toString() : '',
-    tag_id: project.tagId.toString(),
+    tag_id: project.tagId ? project.tagId.toString() : '',
     dynmap_url: project.dynmapUrl || '',
     status: project.status,
     is_private: project.isPrivate || false,
   })
+  
+  // Filter users based on search term
+  const filteredUsers = users.filter(user => 
+    user.username.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    // Filter out the project owner and existing collaborators
+    user.id !== project.userId && 
+    !project.collaborators?.some(collaborator => collaborator.id === user.id)
+  )
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -304,6 +316,141 @@ export default function EditProject({ project, tags = [], flash }: EditProjectPr
                   S'il est public, il sera visible sur toutes les instances.
                 </p>
               </div>
+
+              {/* Collaborators section */}
+              {(project.collaborators && project.collaborators.length > 0) || (auth?.user && (auth.user.id === project.userId || auth.user.role === 'admin') && users.length > 0) ? (
+                <div className="col-span-full mb-6 bg-gray-50 dark:bg-gray-700 p-5 rounded-lg border-l-4 border border-purple-400 dark:border-purple-500 shadow-md">
+                  {project.collaborators && project.collaborators.length > 0 && (
+                    <>
+                      <h3 className="text-lg font-semibold mb-4 flex items-center text-gray-800 dark:text-gray-100">
+                        <span className="inline-block w-6 h-6 mr-2 text-purple-600 dark:text-purple-300">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                          </svg>
+                        </span>
+                        Collaborateurs
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4 pl-2">
+                        {project.collaborators.map((collaborator) => (
+                          <div key={collaborator.id} className="flex items-center p-3 border rounded-lg bg-white dark:bg-gray-600 dark:border-gray-500 shadow-sm hover:shadow-md transition-shadow">
+                            <img
+                              src={`https://mineskin.eu/helm/${collaborator.username}`}
+                              alt={collaborator.username}
+                              className="w-10 h-10 rounded mr-3"
+                            />
+                            <div className="flex-grow">
+                              <h4 className="font-medium text-gray-800 dark:text-gray-100">{collaborator.username}</h4>
+                            </div>
+                            {auth?.user && (auth.user.id === project.userId || auth.user.role === 'admin') && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (confirm(`Êtes-vous sûr de vouloir retirer ${collaborator.username} des collaborateurs ?`)) {
+                                    router.delete(`/projects/${project.id}/collaborators`, {
+                                      data: { user_id: collaborator.id },
+                                      preserveState: true,
+                                    })
+                                  }
+                                }}
+                                className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 ml-2"
+                                title="Retirer ce collaborateur"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {auth?.user && (auth.user.id === project.userId || auth.user.role === 'admin') && users.length > 0 && (
+                    <div className={`${project.collaborators && project.collaborators.length > 0 ? 'mt-6 pt-6 border-t-2 border-gray-200 dark:border-gray-600' : ''} pl-2`}>
+                      <h4 className="font-medium mb-3 flex items-center text-gray-800 dark:text-gray-100">
+                        <span className="inline-block w-5 h-5 mr-2 text-purple-600 dark:text-purple-300">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                          </svg>
+                        </span>
+                        Ajouter un collaborateur
+                      </h4>
+
+                      <div className="relative mb-3">
+                        <input
+                          type="text"
+                          placeholder="Rechercher par pseudo MC"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                        />
+                        {searchTerm && (
+                          <button
+                            type="button"
+                            onClick={() => setSearchTerm('')}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+
+                      {filteredUsers.length > 0 ? (
+                        <div className="mb-3 max-h-60 overflow-y-auto">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                            {filteredUsers.map((user) => (
+                              <div 
+                                key={user.id} 
+                                className="flex items-center p-2 border rounded cursor-pointer bg-white dark:bg-gray-600 dark:border-gray-500 hover:bg-gray-100 dark:hover:bg-gray-500 transition-colors"
+                                onClick={() => setSelectedUserId(user.id.toString())}
+                              >
+                                <img
+                                  src={`https://mineskin.eu/helm/${user.username}`}
+                                  alt={user.username}
+                                  className="w-8 h-8 rounded mr-2"
+                                />
+                                <span className="text-gray-800 dark:text-gray-100">{user.username}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mb-3 p-4 text-center bg-gray-100 dark:bg-gray-600 rounded text-gray-700 dark:text-gray-200">
+                          {searchTerm ? "Aucun utilisateur ne correspond à votre recherche." : "Aucun utilisateur disponible à ajouter."}
+                        </div>
+                      )}
+
+                      <div className="flex">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (selectedUserId) {
+                              router.post(`/projects/${project.id}/collaborators`, {
+                                user_id: selectedUserId,
+                              }, {
+                                preserveState: true,
+                                onSuccess: () => {
+                                  setSelectedUserId('')
+                                  setSearchTerm('')
+                                },
+                              })
+                            }
+                          }}
+                          disabled={!selectedUserId}
+                          className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Ajouter le collaborateur sélectionné
+                        </button>
+                      </div>
+
+                      {selectedUserId && (
+                        <div className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                          Utilisateur sélectionné: {users.find(u => u.id.toString() === selectedUserId)?.username}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : null}
 
               <div className="col-span-full mt-4 flex justify-between">
                 <a

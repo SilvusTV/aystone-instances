@@ -47,7 +47,7 @@ export default class PagesController {
     query = query.orderBy('created_at', 'desc')
 
     let projects = await query.exec()
-    const tags = await Tag.all()
+    const tags = await Tag.query().orderBy('id', 'asc').exec()
     const instances = await Instance.all()
 
     // Add visited status to projects if user is authenticated and has visiteurPlus role
@@ -61,6 +61,9 @@ export default class PagesController {
         projects = projects.filter((project) => project.isVisited === isVisited)
       }
     }
+
+    // Calculate and set the average rating for all projects
+    await Project.setAverageRatings(projects)
 
     return inertia.render('home_new', {
       projects,
@@ -77,5 +80,9 @@ export default class PagesController {
   async map({ response }: HttpContext) {
     // Redirect to the dynmap URL (this would be configured in an environment variable in a real app)
     return response.redirect('https://dynmap.aystone.fr')
+  }
+
+  async utils({ inertia }: HttpContext) {
+    return inertia.render('utils')
   }
 }

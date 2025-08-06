@@ -11,9 +11,45 @@ export default class InstancesController {
     return inertia.render('instances/index', { instances })
   }
 
-  async show({ inertia, params }: HttpContext) {
+  async show({ inertia, params, auth }: HttpContext) {
     const instance = await Instance.findByOrFail('name', params.name)
-    return inertia.render('instances/show', { instance })
+    await instance.load('descriptions')
+    
+    // Check if user is an instance admin for this instance or a global admin
+    const canEdit = auth.user && (
+      auth.user.role === 'admin' ||
+      (auth.user.role === 'instanceAdmin' && auth.user.instanceId === instance.id)
+    )
+    
+    // Get project statistics for this instance
+    const projects = await Project.query().where('instance_id', instance.id).exec()
+    
+    // Calculate statistics
+    const projectStats = {
+      total: projects.length,
+      byStatus: {
+        en_cours: projects.filter(p => p.status === 'en_cours').length,
+        termine: projects.filter(p => p.status === 'termine').length
+      },
+      byDimension: {
+        overworld: projects.filter(p => p.dimension === 'overworld').length,
+        nether: projects.filter(p => p.dimension === 'nether').length,
+        end: projects.filter(p => p.dimension === 'end').length
+      },
+      byTag: {}
+    }
+    
+    // Count projects by tag
+    const tagCounts = {}
+    for (const project of projects) {
+      if (project.tag) {
+        const tagLabel = project.tag.label
+        tagCounts[tagLabel] = (tagCounts[tagLabel] || 0) + 1
+      }
+    }
+    projectStats.byTag = tagCounts
+    
+    return inertia.render('instances/show', { instance, projectStats, canEdit })
   }
 
   async projects({ inertia, params, auth, request }: HttpContext) {
@@ -87,10 +123,65 @@ export default class InstancesController {
       })
 
       session?.flash('success', 'Description mise à jour avec succès')
-      return response.redirect(`/instances/${instance.name}/description`)
+      return response.redirect(`/instances/${instance.name}`)
     } catch (error) {
       console.error('Error updating instance description:', error)
       session?.flash('error', 'Erreur lors de la mise à jour de la description')
+      return response.redirect().back()
+    }
+  }
+
+  async deleteDescription({ params, response, session }: HttpContext) {
+    const instance = await Instance.findByOrFail('name', params.name)
+    const descriptionId = params.id
+    
+    try {
+      // Find the description
+      const description = await InstanceDescription.findOrFail(descriptionId)
+      
+      // Check if the description belongs to the instance
+      if (description.instanceId !== instance.id) {
+        session?.flash('error', 'Cette description n\'appartient pas à cette instance')
+        return response.redirect().back()
+      }
+      
+      // Delete the description
+      await description.delete()
+      
+      session?.flash('success', 'Description supprimée avec succès')
+      return response.redirect(`/instances/${instance.name}/description/edit`)
+    } catch (error) {
+      console.error('Error deleting instance description:', error)
+      session?.flash('error', 'Erreur lors de la suppression de la description')
+      return response.redirect().back()
+    }
+  }
+  
+  async editExistingDescription({ params, request, response, session }: HttpContext) {
+    const instance = await Instance.findByOrFail('name', params.name)
+    const descriptionId = params.id
+    const { title, content } = request.only(['title', 'content'])
+    
+    try {
+      // Find the description
+      const description = await InstanceDescription.findOrFail(descriptionId)
+      
+      // Check if the description belongs to the instance
+      if (description.instanceId !== instance.id) {
+        session?.flash('error', 'Cette description n\'appartient pas à cette instance')
+        return response.redirect().back()
+      }
+      
+      // Update the description
+      description.title = title
+      description.content = content
+      await description.save()
+      
+      session?.flash('success', 'Description modifiée avec succès')
+      return response.redirect(`/instances/${instance.name}/description/edit`)
+    } catch (error) {
+      console.error('Error editing instance description:', error)
+      session?.flash('error', 'Erreur lors de la modification de la description')
       return response.redirect().back()
     }
   }

@@ -139,11 +139,9 @@ export default class Project extends BaseModel {
 
     // Get all project IDs
     const projectIds = projects.map((project) => project.id)
-
     // Get all ratings for these projects
-    const ratings = await ProjectRating.query()
-      .whereIn('projectId', projectIds)
-      .exec()
+    const ratings = await ProjectRating.query().whereIn('projectId', projectIds).exec()
+
 
     // Group ratings by project ID
     const ratingsByProject = new Map<number, number[]>()
@@ -159,7 +157,8 @@ export default class Project extends BaseModel {
       const projectRatings = ratingsByProject.get(project.id) || []
       if (projectRatings.length > 0) {
         const sum = projectRatings.reduce((acc, rating) => acc + rating, 0)
-        project.averageRating = Number.parseFloat((sum / projectRatings.length).toFixed(1))
+        const average = Number.parseFloat((sum / projectRatings.length).toFixed(1))
+        project.averageRating = average
       } else {
         project.averageRating = null
       }

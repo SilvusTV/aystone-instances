@@ -58,6 +58,7 @@ export default class ProjectsController {
     const dimension = request.input('dimension', 'all')
     const tagId = request.input('tag_id', 'all')
     const visitedFilter = request.input('visited', 'all')
+    const sortOrder = request.input('sort', 'name_asc') // Default to alphabetical order
 
     let query = Project.query().preload('user').preload('tag')
 
@@ -86,11 +87,26 @@ export default class ProjectsController {
       query = query.where('is_private', false)
     }
 
-    // Sort projects by creation date in descending order (newest first)
-    query = query.orderBy('created_at', 'desc')
+    // Apply sorting based on the sort parameter
+    switch (sortOrder) {
+      case 'name_asc':
+        query = query.orderBy('name', 'asc')
+        break
+      case 'name_desc':
+        query = query.orderBy('name', 'desc')
+        break
+      case 'date_desc':
+        query = query.orderBy('created_at', 'desc')
+        break
+      case 'date_asc':
+        query = query.orderBy('created_at', 'asc')
+        break
+      default:
+        query = query.orderBy('name', 'asc') // Default to alphabetical order
+    }
 
     let projects = await query.exec()
-    const tags = await Tag.all()
+    const tags = await Tag.query().orderBy('id', 'asc').exec()
 
     // Add visited status to projects if user is authenticated and has visiteurPlus role
     if (auth.user && auth.user.role === 'visiteurPlus') {
@@ -115,7 +131,7 @@ export default class ProjectsController {
   }
 
   async create({ inertia, auth }: HttpContext) {
-    const tags = await Tag.all()
+    const tags = await Tag.query().orderBy('id', 'asc').exec()
     // Only load users from the same instance as the authenticated user
     const users = await User.query()
       .where('instance_id', auth.user!.instanceId)
@@ -186,7 +202,7 @@ export default class ProjectsController {
       return response.redirect('/dashboard')
     }
 
-    const tags = await Tag.all()
+    const tags = await Tag.query().orderBy('id', 'asc').exec()
 
     return inertia.render('projects/edit', { project, tags })
   }
@@ -243,9 +259,6 @@ export default class ProjectsController {
       try {
         // Delete all records from users_visited_project for this project
         await UserVisitedProject.query().where('projectId', project.id).delete()
-        console.log(
-          `Deleted visited records for project ${project.id} after status change to "termine"`
-        )
       } catch (error) {
         console.error('Error deleting visited project records:', error)
       }

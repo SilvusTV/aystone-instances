@@ -5,11 +5,18 @@ import VisitButton from '@/components/VisitButton'
 import RatingComponent from '@/components/RatingComponent'
 import { Project, PageProps, User } from '@/types'
 
-// Helper function to capitalize dimension names
+// Helper function to capitalize dimension names for display
 const formatDimension = (dimension: string): string => {
   if (dimension === 'overworld') return 'Overworld'
   if (dimension === 'nether') return 'Nether'
   return dimension.charAt(0).toUpperCase() + dimension.slice(1) // For other dimensions like 'end'
+}
+
+// Helper function to format dimension names for dynmap URLs
+const formatDimensionForDynmap = (dimension: string): string => {
+  if (dimension === 'nether') return 'world_nether'
+  if (dimension === 'end') return 'world_the_end'
+  return dimension // Keep 'overworld' as is
 }
 
 interface ProjectShowProps extends PageProps {
@@ -32,15 +39,22 @@ export default function ProjectShow({ auth, project, users = [], canRate = false
     user.id !== project.userId && 
     !project.collaborators?.some(collaborator => collaborator.id === user.id)
   )
-  const searchParams = new URLSearchParams(window.location.search);
-  const from = searchParams.get('from');
-  const instance = searchParams.get('instance');
+  // Safely access window object only in browser environment
+  let from = null;
+  let instance = null;
+  
+  // Only run this code in the browser
+  if (typeof window !== 'undefined') {
+    const searchParams = new URLSearchParams(window.location.search);
+    from = searchParams.get('from');
+    instance = searchParams.get('instance');
+  }
 
   // Determine the return URL and text based on the 'from' parameter
   let returnUrl = '/dashboard';
   let returnText = 'Retour au tableau de bord';
   if (from === 'home') {
-    returnUrl = '/';
+    returnUrl = '#';
     returnText = 'Retour à l\'accueil';
   } else if (from === 'instance_projects' && instance) {
     returnUrl = `/instances/${instance}/projects`;
@@ -54,9 +68,37 @@ export default function ProjectShow({ auth, project, users = [], canRate = false
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Projet: {project.name}</h1>
         <div className="flex justify-between items-center mb-4">
-          <Link href={returnUrl} className="text-primary-600 hover:text-primary-800 dark:text-primary-400">
-            &larr; {returnText}
-          </Link>
+          {from === 'home' ? (
+            <button 
+              onClick={() => {
+                // Safely access window.history only in browser environment
+                if (typeof window !== 'undefined') {
+                  // Try to navigate back
+                  const currentHref = window.location.href;
+                  
+                  // Attempt to go back
+                  window.history.back();
+                  
+                  // Check if navigation worked by setting a timeout
+                  setTimeout(() => {
+                    // If we're still on the same page after trying to go back,
+                    // it means there was no history entry to go back to
+                    if (window.location.href === currentHref) {
+                      // Fallback to home page
+                      router.visit('/');
+                    }
+                  }, 100);
+                }
+              }} 
+              className="text-primary-600 hover:text-primary-800 dark:text-primary-400"
+            >
+              &larr; {returnText}
+            </button>
+          ) : (
+            <Link href={returnUrl} className="text-primary-600 hover:text-primary-800 dark:text-primary-400">
+              &larr; {returnText}
+            </Link>
+          )}
         </div>
       </div>
 
@@ -303,7 +345,7 @@ export default function ProjectShow({ auth, project, users = [], canRate = false
         )}
       </div>
 
-      {project.dynmapUrl && (
+      {(project.dynmapUrl || (project.instance?.name && project.x && project.z)) && (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg mt-8">
           <h2 className="text-2xl font-bold mb-6 pb-2 border-b-2 border-primary-500 dark:border-primary-400 inline-block text-gray-900 dark:text-white">Carte Dynmap</h2>
           <div className="mb-10 bg-gray-50 dark:bg-gray-700 p-5 rounded-lg border-l-4 border border-teal-400 dark:border-teal-500 shadow-md transform transition-all hover:shadow-lg">
@@ -317,7 +359,7 @@ export default function ProjectShow({ auth, project, users = [], canRate = false
             </h3>
             <div className="aspect-video w-full pl-2 pt-2">
               <iframe 
-                src={project.dynmapUrl} 
+                src={project.dynmapUrl || `https://maps.aystone.fr/${project.instance?.name ? project.instance.name.toLowerCase() : ''}/#${formatDimensionForDynmap(project.dimension)}:${project.x}:64:${project.z}:153:0.03:0.83:0:0:perspective`} 
                 className="w-full h-full border-0 rounded shadow"
                 title={`Dynmap pour ${project.name}`}
                 allowFullScreen

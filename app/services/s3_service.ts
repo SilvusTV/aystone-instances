@@ -155,7 +155,6 @@ class S3Service {
           Key: key,
         })
       )
-      console.log(`Deleted file from S3: ${key}`)
     } catch (error) {
       console.error('Error deleting file from S3:', error)
       throw error
@@ -280,7 +279,6 @@ class S3Service {
           ACL: 'public-read',
         })
       )
-      console.log(`Created folder in S3: ${folderPath}`)
     } catch (error) {
       console.error('Error creating folder in S3:', error)
       throw error
@@ -319,7 +317,6 @@ class S3Service {
       // Delete the old object
       await this.deleteFileByKey(oldKey)
 
-      console.log(`Renamed file in S3: ${oldKey} -> ${newKey}`)
       return newKey
     } catch (error) {
       console.error('Error renaming file in S3:', error)

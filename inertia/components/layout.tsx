@@ -192,11 +192,14 @@ export default function Layout({ children }: LayoutProps) {
               <Link href="/" className="hover:text-primary-200 transition">
                 Accueil
               </Link>
-              <Link href="/about" className="hover:text-primary-200 transition">
-                À propos
-              </Link>
               <Link href="/instances" className="hover:text-primary-200 transition">
                 Instances
+              </Link>
+              <Link href="/utils" className="hover:text-primary-200 transition">
+                Liens utiles
+              </Link>
+              <Link href="/about" className="hover:text-primary-200 transition">
+                À propos
               </Link>
 
               {auth.user ? (
@@ -304,18 +307,25 @@ export default function Layout({ children }: LayoutProps) {
                   Accueil
                 </Link>
                 <Link 
-                  href="/about" 
-                  className="block py-2 hover:text-primary-200 transition"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  À propos
-                </Link>
-                <Link 
                   href="/instances" 
                   className="block py-2 hover:text-primary-200 transition"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Instances
+                </Link>
+                <Link 
+                  href="/utils" 
+                  className="block py-2 hover:text-primary-200 transition"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Liens utiles
+                </Link>
+                <Link 
+                  href="/about" 
+                  className="block py-2 hover:text-primary-200 transition"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  À propos
                 </Link>
 
                 {auth.user ? (
