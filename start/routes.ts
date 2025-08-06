@@ -78,6 +78,12 @@ router
     return new PagesController().map(ctx)
   })
   .middleware([middleware.silentAuth()])
+router
+  .get('/utils', async (ctx) => {
+    const { default: PagesController } = await import('#controllers/pages_controller')
+    return new PagesController().utils(ctx)
+  })
+  .middleware([middleware.silentAuth()])
 
 // Instances routes
 router
@@ -98,12 +104,6 @@ router
     return new InstancesController().projects(ctx)
   })
   .middleware([middleware.silentAuth()])
-router
-  .get('/instances/:name/description', async (ctx) => {
-    const { default: InstancesController } = await import('#controllers/instances_controller')
-    return new InstancesController().description(ctx)
-  })
-  .middleware([middleware.silentAuth()])
 
 // Instance description management routes (protected by instanceAdmin middleware)
 router
@@ -117,6 +117,20 @@ router
   .post('/instances/:name/description', async (ctx) => {
     const { default: InstancesController } = await import('#controllers/instances_controller')
     return new InstancesController().updateDescription(ctx)
+  })
+  .middleware([middleware.auth(), middleware.instanceAdmin()])
+
+router
+  .delete('/instances/:name/description/:id', async (ctx) => {
+    const { default: InstancesController } = await import('#controllers/instances_controller')
+    return new InstancesController().deleteDescription(ctx)
+  })
+  .middleware([middleware.auth(), middleware.instanceAdmin()])
+
+router
+  .put('/instances/:name/description/:id', async (ctx) => {
+    const { default: InstancesController } = await import('#controllers/instances_controller')
+    return new InstancesController().editExistingDescription(ctx)
   })
   .middleware([middleware.auth(), middleware.instanceAdmin()])
 router

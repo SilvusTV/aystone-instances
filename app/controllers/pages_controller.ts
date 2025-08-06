@@ -81,4 +81,8 @@ export default class PagesController {
     // Redirect to the dynmap URL (this would be configured in an environment variable in a real app)
     return response.redirect('https://dynmap.aystone.fr')
   }
+
+  async utils({ inertia }: HttpContext) {
+    return inertia.render('utils')
+  }
 }

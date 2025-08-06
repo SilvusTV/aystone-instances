@@ -13,6 +13,13 @@ const formatDimension = (dimension: string): string => {
   return dimension.charAt(0).toUpperCase() + dimension.slice(1) // For other dimensions like 'end'
 }
 
+// Helper function to format dimension names for dynmap URLs
+const formatDimensionForDynmap = (dimension: string): string => {
+  if (dimension === 'nether') return 'world_nether'
+  if (dimension === 'end') return 'world_the_end'
+  return dimension // Keep 'overworld' as is
+}
+
 interface HomeProps {
   projects: Project[]
   tags: Tag[]
@@ -44,6 +51,7 @@ export default function Home({ projects = [], tags = [], instances = [], filters
   const [instanceFilter, setInstanceFilter] = useState<number | 'all'>('all')
   const [visitedFilter, setVisitedFilter] = useState<'all' | 'visited' | 'not_visited'>('all')
   const [sortOrder, setSortOrder] = useState<'name_asc' | 'name_desc' | 'date_desc' | 'date_asc'>('name_asc')
+  const [searchTerm, setSearchTerm] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
   const [filterTimeout, setFilterTimeout] = useState<NodeJS.Timeout | null>(null)
 
@@ -73,6 +81,10 @@ export default function Home({ projects = [], tags = [], instances = [], filters
       setSortOrder(urlParams.get('sort') as 'name_asc' | 'name_desc' | 'date_desc' | 'date_asc')
     }
 
+    if (urlParams.get('search')) {
+      setSearchTerm(urlParams.get('search') || '')
+    }
+
     // Only handle visited filter if user is visiteurPlus
     if (isVisiteurPlus && urlParams.get('visited')) {
       setVisitedFilter(urlParams.get('visited') as 'all' | 'visited' | 'not_visited')
@@ -94,7 +106,8 @@ export default function Home({ projects = [], tags = [], instances = [], filters
       tag: number | 'all',
       instance: number | 'all',
       visited: 'all' | 'visited' | 'not_visited' = 'all',
-      sort: 'name_asc' | 'name_desc' | 'date_desc' | 'date_asc' = 'name_asc'
+      sort: 'name_asc' | 'name_desc' | 'date_desc' | 'date_asc' = 'name_asc',
+      search: string = ''
     ) => {
       // Set loading state immediately
       setIsLoading(true)
@@ -110,6 +123,7 @@ export default function Home({ projects = [], tags = [], instances = [], filters
       setTagFilter(tag)
       setInstanceFilter(instance)
       setSortOrder(sort)
+      setSearchTerm(search)
       if (isVisiteurPlus) {
         setVisitedFilter(visited)
       }
@@ -148,6 +162,13 @@ export default function Home({ projects = [], tags = [], instances = [], filters
           // Set sort order
           url.searchParams.set('sort', sort)
 
+          // Set search term
+          if (search) {
+            url.searchParams.set('search', search)
+          } else {
+            url.searchParams.delete('search')
+          }
+
           // Only include visited filter if user is visiteurPlus
           if (isVisiteurPlus) {
             if (visited === 'all') {
@@ -177,6 +198,9 @@ export default function Home({ projects = [], tags = [], instances = [], filters
     if (dimensionFilter !== 'all' && project.dimension !== dimensionFilter) return false
     if (tagFilter !== 'all' && project.tagId !== tagFilter) return false
     if (instanceFilter !== 'all' && project.instanceId !== instanceFilter) return false
+    
+    // Filter by search term
+    if (searchTerm && !project.name.toLowerCase().includes(searchTerm.toLowerCase())) return false
     
     // Only apply visited filter if user is visiteurPlus
     if (isVisiteurPlus && visitedFilter !== 'all') {
@@ -210,6 +234,54 @@ export default function Home({ projects = [], tags = [], instances = [], filters
             </span>
           )}
         </h2>
+        
+        {/* Search input - spans full width */}
+        <div className="mb-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Rechercher un projet par nom..."
+              value={searchTerm}
+              onChange={(e) => {
+                const newSearchTerm = e.target.value;
+                updateFilters(
+                  statusFilter,
+                  dimensionFilter,
+                  tagFilter,
+                  instanceFilter,
+                  visitedFilter,
+                  sortOrder,
+                  newSearchTerm
+                );
+              }}
+              className="w-full p-2 pl-10 border rounded dark:bg-gray-700 dark:border-gray-600"
+            />
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+            {searchTerm && (
+              <button
+                onClick={() => updateFilters(
+                  statusFilter,
+                  dimensionFilter,
+                  tagFilter,
+                  instanceFilter,
+                  visitedFilter,
+                  sortOrder,
+                  ''
+                )}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+        
         {/* Main filter grid with 6 columns for better alignment */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           {/* First row - 3 filters that each span 2 columns on large screens */}
@@ -467,9 +539,9 @@ export default function Home({ projects = [], tags = [], instances = [], filters
                     )}
                   </div>
 
-                  {project.dynmapUrl && (
+                  {(project.dynmapUrl || (project.instance?.name && project.x && project.z)) && (
                     <a 
-                      href={project.dynmapUrl} 
+                      href={project.dynmapUrl || `https://maps.aystone.fr/${project.instance?.name ? project.instance.name.toLowerCase() : ''}/#${formatDimensionForDynmap(project.dimension)}:${project.x}:64:${project.z}:153:0.03:0.83:0:0:perspective`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm sm:text-base"
