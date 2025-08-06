@@ -4,6 +4,7 @@ import { compose } from '@adonisjs/core/helpers'
 import { BaseModel, column, hasMany, belongsTo, manyToMany } from '@adonisjs/lucid/orm'
 import type { HasMany, BelongsTo, ManyToMany } from '@adonisjs/lucid/types/relations'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
+import { DbRememberMeTokensProvider } from '@adonisjs/auth/session'
 import Project from './project.js'
 import Config from './config.js'
 import Instance from './instance.js'
@@ -15,6 +16,11 @@ const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
 })
 
 export default class User extends compose(BaseModel, AuthFinder) {
+  /**
+   * Token provider for remember me tokens
+   */
+  static rememberMeTokens: any
+
   @column({ isPrimary: true })
   declare id: number
 
@@ -64,3 +70,6 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @hasMany(() => UserVisitedProject)
   declare visitedProjects: HasMany<typeof UserVisitedProject>
 }
+
+// Initialize rememberMeTokens after the class is defined
+User.rememberMeTokens = DbRememberMeTokensProvider.forModel(User)

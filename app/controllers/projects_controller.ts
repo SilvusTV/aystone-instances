@@ -106,7 +106,7 @@ export default class ProjectsController {
     }
 
     let projects = await query.exec()
-    const tags = await Tag.all()
+    const tags = await Tag.query().orderBy('id', 'asc').exec()
 
     // Add visited status to projects if user is authenticated and has visiteurPlus role
     if (auth.user && auth.user.role === 'visiteurPlus') {
@@ -131,7 +131,7 @@ export default class ProjectsController {
   }
 
   async create({ inertia, auth }: HttpContext) {
-    const tags = await Tag.all()
+    const tags = await Tag.query().orderBy('id', 'asc').exec()
     // Only load users from the same instance as the authenticated user
     const users = await User.query()
       .where('instance_id', auth.user!.instanceId)
@@ -202,7 +202,7 @@ export default class ProjectsController {
       return response.redirect('/dashboard')
     }
 
-    const tags = await Tag.all()
+    const tags = await Tag.query().orderBy('id', 'asc').exec()
 
     return inertia.render('projects/edit', { project, tags })
   }
@@ -259,9 +259,6 @@ export default class ProjectsController {
       try {
         // Delete all records from users_visited_project for this project
         await UserVisitedProject.query().where('projectId', project.id).delete()
-        console.log(
-          `Deleted visited records for project ${project.id} after status change to "termine"`
-        )
       } catch (error) {
         console.error('Error deleting visited project records:', error)
       }

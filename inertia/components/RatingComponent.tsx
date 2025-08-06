@@ -54,16 +54,6 @@ export default function RatingComponent({ projectId, averageRating, canRate, use
     // Check if rating is a valid number (not null, undefined, or NaN)
     const isValidRating = rating !== null && rating !== undefined && !isNaN(rating);
     
-    // Debug: Log the rating information
-    console.log(`DEBUG: RatingComponent for project ${projectId}:`, {
-      originalRating: averageRating,
-      convertedRating: rating,
-      isNull: rating === null,
-      isUndefined: rating === undefined,
-      isNaN: isNaN(rating),
-      isValidRating: isValidRating
-    });
-    
     return (
       <div className="flex items-center">
         <div className="flex">

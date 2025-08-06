@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Head, Link, usePage, router } from '@inertiajs/react'
+import { Head, usePage, router } from '@inertiajs/react'
 import Layout from '@/components/layout'
 import VisitButton from '@/components/VisitButton'
 import TeleportCommand from '@/components/TeleportCommand'
-import ToastDemo from '@/components/ToastDemo'
 import { Project, Tag, Instance, PageProps } from '@/types'
 
 // Helper function to capitalize dimension names
@@ -37,12 +36,6 @@ export default function Home({ projects = [], tags = [], instances = [], filters
   // Get auth from page props
   const { auth } = usePage<PageProps>().props
   const isVisiteurPlus = auth.user?.role === 'visiteurPlus'
-  
-  // Debug: Log projects and their average ratings
-  console.log('DEBUG: Number of projects received:', projects.length)
-  projects.forEach(project => {
-    console.log(`DEBUG: Project ${project.id} (${project.name}) - averageRating:`, project.averageRating)
-  })
 
   // Initialize with default values
   const [statusFilter, setStatusFilter] = useState<'all' | 'en_cours' | 'termine'>('all')
@@ -209,6 +202,20 @@ export default function Home({ projects = [], tags = [], instances = [], filters
     }
     
     return true
+  }).sort((a, b) => {
+    // Apply client-side sorting based on sortOrder
+    switch (sortOrder) {
+      case 'name_asc':
+        return a.name.localeCompare(b.name)
+      case 'name_desc':
+        return b.name.localeCompare(a.name)
+      case 'date_desc':
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      case 'date_asc':
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      default:
+        return a.name.localeCompare(b.name) // Default to alphabetical order
+    }
   })
 
   return (

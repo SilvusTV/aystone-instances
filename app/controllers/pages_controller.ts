@@ -47,7 +47,7 @@ export default class PagesController {
     query = query.orderBy('created_at', 'desc')
 
     let projects = await query.exec()
-    const tags = await Tag.all()
+    const tags = await Tag.query().orderBy('id', 'asc').exec()
     const instances = await Instance.all()
 
     // Add visited status to projects if user is authenticated and has visiteurPlus role
