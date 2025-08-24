@@ -9,6 +9,7 @@ interface CreateProjectProps extends PageProps {
 }
 
 export default function CreateProject({ tags = [], users = [], flash }: CreateProjectProps) {
+  const [autoComplementary, setAutoComplementary] = useState(true)
   const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -32,6 +33,38 @@ export default function CreateProject({ tags = [], users = [], flash }: CreatePr
     collaborators: [] as string[],
     is_private: false,
   })
+
+  // Auto-correct complementary coordinates based on dimension and main coordinates
+  // - Overworld <-> Nether conversion uses factor 8 on X and Z; Y remains the same
+  // - For 'end', complementary coordinates are cleared
+  React.useEffect(() => {
+    if (!autoComplementary) return
+
+    const x = Number(data.x)
+    const y = Number(data.y)
+    const z = Number(data.z)
+
+    if (!isNaN(x) && !isNaN(z)) {
+      if (data.dimension === 'overworld') {
+        const nx = Math.round(x / 8)
+        const nz = Math.round(z / 8)
+        setData('complementary_x', String(nx))
+        setData('complementary_z', String(nz))
+      } else if (data.dimension === 'nether') {
+        const ox = Math.round(x * 8)
+        const oz = Math.round(z * 8)
+        setData('complementary_x', String(ox))
+        setData('complementary_z', String(oz))
+      } else {
+        setData('complementary_x', '')
+        setData('complementary_z', '')
+      }
+    }
+
+    if (!isNaN(y)) {
+      setData('complementary_y', String(Math.round(y)))
+    }
+  }, [autoComplementary, data.dimension, data.x, data.y, data.z])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -222,7 +255,7 @@ export default function CreateProject({ tags = [], users = [], flash }: CreatePr
                         errors.complementary_x ? 'border-red-500' : ''
                       }`}
                       value={data.complementary_x}
-                      onChange={(e) => setData('complementary_x', e.target.value)}
+                      onChange={(e) => { setAutoComplementary(false); setData('complementary_x', e.target.value) }}
                     />
                     {errors.complementary_x && (
                       <p className="text-red-500 text-sm mt-1">{errors.complementary_x}</p>
@@ -238,7 +271,7 @@ export default function CreateProject({ tags = [], users = [], flash }: CreatePr
                         errors.complementary_y ? 'border-red-500' : ''
                       }`}
                       value={data.complementary_y}
-                      onChange={(e) => setData('complementary_y', e.target.value)}
+                      onChange={(e) => { setAutoComplementary(false); setData('complementary_y', e.target.value) }}
                     />
                     {errors.complementary_y && (
                       <p className="text-red-500 text-sm mt-1">{errors.complementary_y}</p>
@@ -254,7 +287,7 @@ export default function CreateProject({ tags = [], users = [], flash }: CreatePr
                         errors.complementary_z ? 'border-red-500' : ''
                       }`}
                       value={data.complementary_z}
-                      onChange={(e) => setData('complementary_z', e.target.value)}
+                      onChange={(e) => { setAutoComplementary(false); setData('complementary_z', e.target.value) }}
                     />
                     {errors.complementary_z && (
                       <p className="text-red-500 text-sm mt-1">{errors.complementary_z}</p>

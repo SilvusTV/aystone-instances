@@ -10,6 +10,7 @@ interface EditProjectProps extends PageProps {
 }
 
 export default function EditProject({ project, tags = [], users = [], flash, auth }: EditProjectProps) {
+  const [autoComplementary, setAutoComplementary] = useState(true)
   const [selectedUserId, setSelectedUserId] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   
@@ -28,6 +29,36 @@ export default function EditProject({ project, tags = [], users = [], flash, aut
     status: project.status,
     is_private: project.isPrivate || false,
   })
+
+  // Auto-correct complementary coordinates based on dimension and main coordinates
+  React.useEffect(() => {
+    if (!autoComplementary) return
+
+    const x = Number(data.x)
+    const y = Number(data.y)
+    const z = Number(data.z)
+
+    if (!isNaN(x) && !isNaN(z)) {
+      if (data.dimension === 'overworld') {
+        const nx = Math.round(x / 8)
+        const nz = Math.round(z / 8)
+        setData('complementary_x', String(nx))
+        setData('complementary_z', String(nz))
+      } else if (data.dimension === 'nether') {
+        const ox = Math.round(x * 8)
+        const oz = Math.round(z * 8)
+        setData('complementary_x', String(ox))
+        setData('complementary_z', String(oz))
+      } else {
+        setData('complementary_x', '')
+        setData('complementary_z', '')
+      }
+    }
+
+    if (!isNaN(y)) {
+      setData('complementary_y', String(Math.round(y)))
+    }
+  }, [autoComplementary, data.dimension, data.x, data.y, data.z])
   
   // Filter users based on search term
   const filteredUsers = users.filter(user => 
@@ -235,7 +266,7 @@ export default function EditProject({ project, tags = [], users = [], flash, aut
                         errors.complementary_x ? 'border-red-500' : ''
                       }`}
                       value={data.complementary_x}
-                      onChange={(e) => setData('complementary_x', e.target.value)}
+                      onChange={(e) => { setAutoComplementary(false); setData('complementary_x', e.target.value) }}
                     />
                     {errors.complementary_x && (
                       <p className="text-red-500 text-sm mt-1">{errors.complementary_x}</p>
@@ -251,7 +282,7 @@ export default function EditProject({ project, tags = [], users = [], flash, aut
                         errors.complementary_y ? 'border-red-500' : ''
                       }`}
                       value={data.complementary_y}
-                      onChange={(e) => setData('complementary_y', e.target.value)}
+                      onChange={(e) => { setAutoComplementary(false); setData('complementary_y', e.target.value) }}
                     />
                     {errors.complementary_y && (
                       <p className="text-red-500 text-sm mt-1">{errors.complementary_y}</p>
@@ -267,7 +298,7 @@ export default function EditProject({ project, tags = [], users = [], flash, aut
                         errors.complementary_z ? 'border-red-500' : ''
                       }`}
                       value={data.complementary_z}
-                      onChange={(e) => setData('complementary_z', e.target.value)}
+                      onChange={(e) => { setAutoComplementary(false); setData('complementary_z', e.target.value) }}
                     />
                     {errors.complementary_z && (
                       <p className="text-red-500 text-sm mt-1">{errors.complementary_z}</p>

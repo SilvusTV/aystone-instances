@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Layout from '@/components/layout'
 import VisitButton from '@/components/VisitButton'
 import RatingComponent from '@/components/RatingComponent'
+import TeleportCommand from '@/components/TeleportCommand'
 import { Project, PageProps, User } from '@/types'
 
 // Helper function to capitalize dimension names for display
@@ -39,22 +40,19 @@ export default function ProjectShow({ auth, project, users = [], canRate = false
     user.id !== project.userId && 
     !project.collaborators?.some(collaborator => collaborator.id === user.id)
   )
-  // Safely access window object only in browser environment
-  let from = null;
-  let instance = null;
-  
-  // Only run this code in the browser
-  if (typeof window !== 'undefined') {
-    const searchParams = new URLSearchParams(window.location.search);
-    from = searchParams.get('from');
-    instance = searchParams.get('instance');
-  }
+  // Read current URL from Inertia (works in SSR and CSR) to avoid hydration mismatches
+  const { url } = usePage<any>();
+  const queryString = url.includes('?') ? url.split('?')[1] : '';
+  const searchParams = new URLSearchParams(queryString);
+  const from = searchParams.get('from');
+  const instance = searchParams.get('instance');
 
   // Determine the return URL and text based on the 'from' parameter
   let returnUrl = '/dashboard';
   let returnText = 'Retour au tableau de bord';
   if (from === 'home') {
-    returnUrl = '#';
+    // Use home URL but keep same element type on server/client
+    returnUrl = '/';
     returnText = 'Retour à l\'accueil';
   } else if (from === 'instance_projects' && instance) {
     returnUrl = `/instances/${instance}/projects`;
@@ -68,37 +66,29 @@ export default function ProjectShow({ auth, project, users = [], canRate = false
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Projet: {project.name}</h1>
         <div className="flex justify-between items-center mb-4">
-          {from === 'home' ? (
-            <button 
-              onClick={() => {
-                // Safely access window.history only in browser environment
+          <Link
+            href={returnUrl}
+            onClick={(e) => {
+              if (from === 'home') {
+                e.preventDefault();
+                // Try to navigate back; if no history, fall back to home
                 if (typeof window !== 'undefined') {
-                  // Try to navigate back
                   const currentHref = window.location.href;
-                  
-                  // Attempt to go back
                   window.history.back();
-                  
-                  // Check if navigation worked by setting a timeout
                   setTimeout(() => {
-                    // If we're still on the same page after trying to go back,
-                    // it means there was no history entry to go back to
                     if (window.location.href === currentHref) {
-                      // Fallback to home page
                       router.visit('/');
                     }
                   }, 100);
+                } else {
+                  // SSR no-op
                 }
-              }} 
-              className="text-primary-600 hover:text-primary-800 dark:text-primary-400"
-            >
-              &larr; {returnText}
-            </button>
-          ) : (
-            <Link href={returnUrl} className="text-primary-600 hover:text-primary-800 dark:text-primary-400">
-              &larr; {returnText}
-            </Link>
-          )}
+              }
+            }}
+            className="text-primary-600 hover:text-primary-800 dark:text-primary-400"
+          >
+            &larr; {returnText}
+          </Link>
         </div>
       </div>
 
@@ -146,9 +136,37 @@ export default function ProjectShow({ auth, project, users = [], canRate = false
             </h3>
             <div className="space-y-3 pl-2 text-gray-700 dark:text-gray-200">
               <p><span className="font-medium text-gray-800 dark:text-gray-100">Dimension:</span> {formatDimension(project.dimension)}</p>
-              <p><span className="font-medium text-gray-800 dark:text-gray-100">Coordonnées:</span> X: {project.x}, Y: {project.y}, Z: {project.z}</p>
-              {(project.complementary_x !== null || project.complementary_y !== null || project.complementary_z !== null) && (
-                <p><span className="font-medium text-gray-800 dark:text-gray-100">Coordonnées complémentaires{project.dimension === 'overworld' ? ' (Nether)' : project.dimension === 'nether' ? ' (Overworld)' : ''}:</span> X: {project.complementary_x}, Y: {project.complementary_y}, Z: {project.complementary_z}</p>
+              <p>
+                <span className="font-medium text-gray-800 dark:text-gray-100">Coordonnées:</span>{' '}
+                <TeleportCommand 
+                  x={project.x} 
+                  y={project.y} 
+                  z={project.z} 
+                  dimension={project.dimension} 
+                  enableCopy={isVisiteurPlus}
+                />
+              </p>
+              {(project.dimension === 'overworld' || project.dimension === 'nether') && (
+                <p>
+                  <span className="font-medium text-gray-800 dark:text-gray-100">Coordonnées complémentaires{project.dimension === 'overworld' ? ' (Nether)' : project.dimension === 'nether' ? ' (Overworld)' : ''}:</span>{' '}
+                  {(() => {
+                    const isOverworld = project.dimension === 'overworld'
+                    const isNether = project.dimension === 'nether'
+                    const compX = project.complementary_x ?? (isOverworld ? Math.round(project.x / 8) : isNether ? Math.round(project.x * 8) : project.x)
+                    const compY = project.complementary_y ?? project.y
+                    const compZ = project.complementary_z ?? (isOverworld ? Math.round(project.z / 8) : isNether ? Math.round(project.z * 8) : project.z)
+                    const compDim = isOverworld ? 'nether' : isNether ? 'overworld' : project.dimension
+                    return (
+                      <TeleportCommand
+                        x={compX}
+                        y={compY}
+                        z={compZ}
+                        dimension={compDim}
+                        enableCopy={isVisiteurPlus}
+                      />
+                    )
+                  })()}
+                </p>
               )}
             </div>
           </div>
@@ -357,7 +375,24 @@ export default function ProjectShow({ auth, project, users = [], canRate = false
               </span>
               Visualisation interactive
             </h3>
-            <div className="aspect-video w-full pl-2 pt-2">
+            <div className="aspect-video w-full pl-2 pt-2 relative">
+              {project.dynmapUrl && (
+                <a
+                  href={project.dynmapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute top-3 right-3 z-10 px-3 py-1 rounded bg-white/80 dark:bg-gray-900/70 text-gray-800 dark:text-gray-100 text-sm shadow hover:bg-white dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 backdrop-blur"
+                  title="Ouvrir sur le site Dynmap"
+                >
+                  <span className="inline-flex items-center">
+                    Voir sur la dynmap
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 ml-1">
+                      <path fillRule="evenodd" d="M12.293 2.293a1 1 0 011.414 0l4 4a1 1 0 01-.707 1.707H16a1 1 0 110-2h.586L13 3.414V4a1 1 0 11-2 0V3a1 1 0 011.293-.707z" clipRule="evenodd" />
+                      <path d="M5 6a3 3 0 013-3h1a1 1 0 110 2H8a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1v-1a1 1 0 112 0v1a3 3 0 01-3 3H8a3 3 0 01-3-3V6z" />
+                    </svg>
+                  </span>
+                </a>
+              )}
               <iframe 
                 src={project.dynmapUrl || `https://maps.aystone.fr/${project.instance?.name ? project.instance.name.toLowerCase() : ''}/#${formatDimensionForDynmap(project.dimension)}:${project.x}:64:${project.z}:153:0.03:0.83:0:0:perspective`} 
                 className="w-full h-full border-0 rounded shadow"
