@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Head, Link, usePage } from '@inertiajs/react'
 import Layout from '@/components/layout'
+import InstanceNav from '@/components/InstanceNav'
 import VisitButton from '@/components/VisitButton'
 import { Instance, Project, PageProps } from '@/types'
 
@@ -88,35 +89,7 @@ export default function InstanceProjects({ instance, projects = [], filters = { 
         </div>
       </div>
 
-      {/* Sub-navigation */}
-      <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-6">
-        <nav className="flex flex-wrap gap-4">
-          <Link
-            href={`/instances/${instance.name}`}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-          >
-            Aperçu
-          </Link>
-          <Link
-            href={`/instances/${instance.name}/projects`}
-            className="px-4 py-2 rounded bg-primary-500 text-white hover:bg-primary-600 transition"
-          >
-            Projets
-          </Link>
-          <Link
-            href={`/instances/${instance.name}/members`}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-          >
-            Membres
-          </Link>
-          <Link
-            href={`/instances/${instance.name}/dynmap`}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-          >
-            DynMap
-          </Link>
-        </nav>
-      </div>
+      <InstanceNav instanceName={instance.name} />
 
       <div className="mb-6 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
         <h2 className="text-xl font-semibold mb-4">Filtres</h2>

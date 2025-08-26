@@ -123,6 +123,37 @@ class S3Service {
   }
 
   /**
+   * Upload a raw Buffer to a specific key in S3
+   */
+  async uploadBuffer(buffer: Buffer, key: string, contentType: string = 'application/octet-stream'): Promise<string> {
+    // Ensure the bucket exists
+    await this.ensureBucketExists()
+
+    // Normalize key (remove any leading slashes)
+    if (key.startsWith('/')) {
+      key = key.slice(1)
+    }
+
+    await this.client.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        Body: buffer,
+        ContentType: contentType,
+        ACL: 'public-read',
+      })
+    )
+
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+    })
+
+    const signedUrl = await getSignedUrl(this.client, command, { expiresIn: 604800 })
+    return signedUrl
+  }
+
+  /**
    * Generate a presigned URL for an existing object
    */
   async getPresignedUrl(key: string, expiresIn: number = 604800): Promise<string> {

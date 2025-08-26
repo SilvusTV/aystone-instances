@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react'
 import Layout from '@/components/layout'
+import InstanceNav from '@/components/InstanceNav'
 import { Instance, InstanceDescription, Project } from '@/types'
 
 interface InstanceShowProps {
@@ -40,35 +41,7 @@ export default function InstanceShow({ instance, projectStats = {
         </div>
       </div>
 
-      {/* Sub-navigation */}
-      <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-6">
-        <nav className="flex flex-wrap gap-2 sm:gap-4">
-          <Link
-            href={`/instances/${instance.name}`}
-            className="px-3 py-2 sm:px-4 text-sm sm:text-base rounded bg-primary-500 text-white hover:bg-primary-600 transition flex-grow sm:flex-grow-0 text-center"
-          >
-            Aperçu
-          </Link>
-          <Link
-            href={`/instances/${instance.name}/projects`}
-            className="px-3 py-2 sm:px-4 text-sm sm:text-base rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition flex-grow sm:flex-grow-0 text-center"
-          >
-            Projets
-          </Link>
-          <Link
-            href={`/instances/${instance.name}/members`}
-            className="px-3 py-2 sm:px-4 text-sm sm:text-base rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition flex-grow sm:flex-grow-0 text-center"
-          >
-            Membres
-          </Link>
-          <Link
-            href={`/instances/${instance.name}/dynmap`}
-            className="px-3 py-2 sm:px-4 text-sm sm:text-base rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition flex-grow sm:flex-grow-0 text-center"
-          >
-            DynMap
-          </Link>
-        </nav>
-      </div>
+      <InstanceNav instanceName={instance.name} />
 
       {/* Description section */}
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-6">

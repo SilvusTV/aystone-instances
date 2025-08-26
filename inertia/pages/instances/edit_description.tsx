@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Head, Link, useForm, router } from '@inertiajs/react'
 import Layout from '@/components/layout'
+import InstanceNav from '@/components/InstanceNav'
 import { Instance, InstanceDescription, PageProps } from '@/types'
 
 interface EditInstanceDescriptionPageProps extends PageProps {
@@ -72,35 +73,7 @@ export default function EditInstanceDescriptionPage({
         </div>
       </div>
 
-      {/* Sub-navigation */}
-      <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-6">
-        <nav className="flex flex-wrap gap-4">
-          <Link
-            href={`/instances/${instance.name}`}
-            className="px-4 py-2 rounded bg-primary-500 text-white hover:bg-primary-600 transition"
-          >
-            Aperçu
-          </Link>
-          <Link
-            href={`/instances/${instance.name}/projects`}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-          >
-            Projets
-          </Link>
-          <Link
-            href={`/instances/${instance.name}/members`}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-          >
-            Membres
-          </Link>
-          <Link
-            href={`/instances/${instance.name}/dynmap`}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-          >
-            DynMap
-          </Link>
-        </nav>
-      </div>
+      <InstanceNav instanceName={instance.name} />
 
       {flash?.success && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">

@@ -1,9 +1,10 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
-import type { HasMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, hasMany, hasOne } from '@adonisjs/lucid/orm'
+import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import Project from './project.js'
 import InstanceDescription from './instance_description.js'
 import User from './user.js'
+import InstanceService from './instance_service.js'
 
 export default class Instance extends BaseModel {
   @column({ isPrimary: true })
@@ -29,4 +30,7 @@ export default class Instance extends BaseModel {
 
   @hasMany(() => User)
   declare users: HasMany<typeof User>
+
+  @hasOne(() => InstanceService)
+  declare service: HasOne<typeof InstanceService>
 }

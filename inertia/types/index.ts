@@ -51,6 +51,7 @@ export interface Instance {
   descriptions?: InstanceDescription[]
   projects?: Project[]
   users?: User[]
+  service?: InstanceService | null
 }
 
 export interface InstanceDescription {
@@ -61,6 +62,16 @@ export interface InstanceDescription {
   createdAt: string
   updatedAt: string | null
   instance?: Instance
+}
+
+export interface InstanceService {
+  id: number
+  instanceId: number
+  title: string
+  priceCents: number
+  description: string
+  createdAt: string
+  updatedAt: string | null
 }
 
 export interface PageProps {

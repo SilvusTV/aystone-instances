@@ -13,3 +13,159 @@ body {
   width: 100%;
   overflow-x: hidden;
 }
+
+
+/* React Draft WYSIWYG themed overrides, scoped to our editor wrapper */
+.ay2-rich-editor .rdw-editor-toolbar {
+  background-color: #f9fafb; /* gray-50 */
+  border-color: #e5e7eb; /* gray-200 */
+}
+.ay2-rich-editor .rdw-option-wrapper {
+  background-color: #ffffff;
+  border: 1px solid transparent;
+  color: #374151; /* gray-700 */
+}
+.ay2-rich-editor .rdw-option-wrapper:hover {
+  background-color: #f3f4f6; /* gray-100 */
+  border-color: #e5e7eb; /* gray-200 */
+}
+.ay2-rich-editor .rdw-option-active {
+  border-color: #2563eb; /* blue-600 */
+  color: #2563eb;
+  background-color: #eff6ff; /* blue-50 */
+}
+.ay2-rich-editor .rdw-dropdown-wrapper {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+}
+.ay2-rich-editor .rdw-dropdown-wrapper:hover {
+  background-color: #f3f4f6;
+}
+.ay2-rich-editor .rdw-dropdown-optionwrapper {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+.ay2-rich-editor .rdw-dropdownoption-default {
+  color: #111827; /* gray-900 */
+}
+.ay2-rich-editor .rdw-dropdownoption-highlighted {
+  background-color: #f3f4f6;
+}
+
+/* Modals (link, image, emoji, color picker) */
+.ay2-rich-editor .rdw-link-modal,
+.ay2-rich-editor .rdw-image-modal,
+.ay2-rich-editor .rdw-colorpicker-modal,
+.ay2-rich-editor .rdw-emoji-modal {
+  background-color: #ffffff !important;
+  color: #111827 !important; /* gray-900 */
+  border: 1px solid #e5e7eb !important; /* gray-200 */
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  z-index: 1000;
+}
+.ay2-rich-editor .rdw-link-modal-label {
+  color: #1f2937; /* gray-800 */
+}
+.ay2-rich-editor .rdw-link-modal-input,
+.ay2-rich-editor .rdw-image-modal-upload-option input[type="text"],
+.ay2-rich-editor .rdw-image-modal-url-input {
+  background-color: #ffffff;
+  color: #111827;
+  border: 1px solid #d1d5db; /* gray-300 */
+}
+.ay2-rich-editor .rdw-link-modal-input::placeholder,
+.ay2-rich-editor .rdw-image-modal-upload-option input[type="text"]::placeholder,
+.ay2-rich-editor .rdw-image-modal-url-input::placeholder {
+  color: #6b7280; /* gray-500 */
+}
+.ay2-rich-editor .rdw-link-modal-buttonsection button,
+.ay2-rich-editor .rdw-image-modal-btn {
+  background-color: #2563eb; /* blue-600 */
+  color: #ffffff;
+  border: 1px solid #1d4ed8; /* blue-700 */
+}
+.ay2-rich-editor .rdw-link-modal-buttonsection button:hover,
+.ay2-rich-editor .rdw-image-modal-btn:hover {
+  background-color: #1d4ed8;
+}
+.ay2-rich-editor .rdw-link-modal-target-option {
+  color: #111827;
+}
+
+/* Colorpicker popover body text */
+.ay2-rich-editor .rdw-colorpicker-modal label {
+  color: #111827;
+}
+
+/* Dark mode variants */
+.dark .ay2-rich-editor .rdw-editor-toolbar {
+  background-color: #111827; /* gray-900 */
+  border-color: #374151; /* gray-700 */
+}
+.dark .ay2-rich-editor .rdw-option-wrapper {
+  background-color: #1f2937; /* gray-800 */
+  color: #e5e7eb; /* gray-200 */
+  border: 1px solid transparent;
+}
+.dark .ay2-rich-editor .rdw-option-wrapper:hover {
+  background-color: #374151; /* gray-700 */
+  border-color: #4b5563; /* gray-600 */
+}
+.dark .ay2-rich-editor .rdw-option-active {
+  border-color: #2563eb;
+  color: #93c5fd; /* blue-300 */
+  background-color: rgba(37, 99, 235, 0.15);
+}
+.dark .ay2-rich-editor .rdw-dropdown-wrapper {
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  color: #e5e7eb;
+}
+.dark .ay2-rich-editor .rdw-dropdown-optionwrapper {
+  background-color: #1f2937;
+  border: 1px solid #374151;
+}
+.dark .ay2-rich-editor .rdw-dropdownoption-default {
+  color: #e5e7eb;
+}
+.dark .ay2-rich-editor .rdw-dropdownoption-highlighted {
+  background-color: #374151;
+}
+.dark .ay2-rich-editor .rdw-link-modal,
+.dark .ay2-rich-editor .rdw-image-modal,
+.dark .ay2-rich-editor .rdw-colorpicker-modal,
+.dark .ay2-rich-editor .rdw-emoji-modal {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important; /* gray-100 */
+  border: 1px solid #374151 !important;
+}
+.dark .ay2-rich-editor .rdw-link-modal-label {
+  color: #e5e7eb;
+}
+.dark .ay2-rich-editor .rdw-link-modal-input,
+.dark .ay2-rich-editor .rdw-image-modal-upload-option input[type="text"],
+.dark .ay2-rich-editor .rdw-image-modal-url-input {
+  background-color: #111827;
+  color: #e5e7eb;
+  border: 1px solid #4b5563;
+}
+.dark .ay2-rich-editor .rdw-link-modal-input::placeholder,
+.dark .ay2-rich-editor .rdw-image-modal-upload-option input[type="text"]::placeholder,
+.dark .ay2-rich-editor .rdw-image-modal-url-input::placeholder {
+  color: #9ca3af;
+}
+.dark .ay2-rich-editor .rdw-link-modal-buttonsection button,
+.dark .ay2-rich-editor .rdw-image-modal-btn {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: 1px solid #1d4ed8;
+}
+.dark .ay2-rich-editor .rdw-link-modal-buttonsection button:hover,
+.dark .ay2-rich-editor .rdw-image-modal-btn:hover {
+  background-color: #1d4ed8;
+}
+.dark .ay2-rich-editor .rdw-link-modal-target-option,
+.dark .ay2-rich-editor .rdw-colorpicker-modal label {
+  color: #e5e7eb;
+}

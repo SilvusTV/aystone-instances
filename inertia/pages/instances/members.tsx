@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Head, Link } from '@inertiajs/react'
 import Layout from '@/components/layout'
+import InstanceNav from '@/components/InstanceNav'
 import { Instance, User } from '@/types'
 
 interface InstanceMembersProps {
@@ -28,39 +29,14 @@ export default function InstanceMembers({ instance, members = [] }: InstanceMemb
         </div>
       </div>
 
-      {/* Sub-navigation */}
-      <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-6">
-        <nav className="flex flex-wrap gap-4">
-          <Link
-            href={`/instances/${instance.name}`}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-          >
-            Aperçu
-          </Link>
-          <Link
-            href={`/instances/${instance.name}/projects`}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-          >
-            Projets
-          </Link>
-          <Link
-            href={`/instances/${instance.name}/members`}
-            className="px-4 py-2 rounded bg-primary-500 text-white hover:bg-primary-600 transition"
-          >
-            Membres
-          </Link>
-          <Link
-            href={`/instances/${instance.name}/dynmap`}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-          >
-            DynMap
-          </Link>
-        </nav>
-      </div>
+      <InstanceNav instanceName={instance.name} />
 
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Liste des membres</h2>
+          <div>
+            <h2 className="text-2xl font-bold">Liste des membres</h2>
+            <p className="text-sm text-gray-500">{members.length} {members.length === 1 ? 'membre' : 'membres'}</p>
+          </div>
           <div className="relative">
             <input
               type="text"

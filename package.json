@@ -45,6 +45,7 @@
     "@types/node": "^22.15.18",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@types/draft-js": "^0.11.17",
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.16",
     "eslint": "^9.26.0",
@@ -79,7 +80,12 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "reflect-metadata": "^0.2.2",
-    "resend": "^4.7.0"
+    "resend": "^4.7.0",
+    "sharp": "^0.33.4",
+    "react-draft-wysiwyg": "^1.15.0",
+    "draft-js": "^0.11.7",
+    "draftjs-to-html": "^0.9.1",
+    "html-to-draftjs": "^1.5.0"
   },
   "hotHook": {
     "boundaries": [
