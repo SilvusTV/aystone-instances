@@ -10,7 +10,12 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
 
-// S3 file serving route
+// S3 file serving routes
+router.get('/s3/:dir1/:dir2/:filename', async (ctx) => {
+  const { default: S3Controller } = await import('#controllers/s3_controller')
+  return new S3Controller().serveNestedFile(ctx)
+})
+
 router.get('/s3/:directory/:filename', async (ctx) => {
   const { default: S3Controller } = await import('#controllers/s3_controller')
   return new S3Controller().serveFile(ctx)
@@ -145,6 +150,35 @@ router
     return new InstancesController().dynmap(ctx)
   })
   .middleware([middleware.silentAuth()])
+
+// Instance service routes
+router
+  .get('/instances/:name/service', async (ctx) => {
+    const { default: InstancesController } = await import('#controllers/instances_controller')
+    return new InstancesController().service(ctx)
+  })
+  .middleware([middleware.silentAuth()])
+
+router
+  .get('/instances/:name/service/edit', async (ctx) => {
+    const { default: InstancesController } = await import('#controllers/instances_controller')
+    return new InstancesController().editService(ctx)
+  })
+  .middleware([middleware.auth(), middleware.instanceAdmin()])
+
+router
+  .post('/instances/:name/service', async (ctx) => {
+    const { default: InstancesController } = await import('#controllers/instances_controller')
+    return new InstancesController().updateService(ctx)
+  })
+  .middleware([middleware.auth(), middleware.instanceAdmin()])
+
+router
+  .post('/api/instances/:name/service/upload-image', async (ctx) => {
+    const { default: InstancesController } = await import('#controllers/instances_controller')
+    return new InstancesController().uploadServiceImage(ctx)
+  })
+  .middleware([middleware.auth(), middleware.instanceAdmin()])
 
 // Auth routes
 router

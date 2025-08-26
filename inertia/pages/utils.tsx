@@ -138,7 +138,7 @@ export default function UtilsPage() {
             </li>
             <li>
               <a 
-                href="https://rebane2001.com/mapartcraft/"
+                href="https://www.minecraftmapmaker.com/"
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400"
@@ -146,7 +146,7 @@ export default function UtilsPage() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                MapArtCraft (Création de pixel art)
+                Map Maker (Création de pixel art)
               </a>
             </li>
           </ul>

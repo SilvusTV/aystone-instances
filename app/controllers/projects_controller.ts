@@ -244,9 +244,9 @@ export default class ProjectsController {
     project.x = data.x
     project.y = data.y
     project.z = data.z
-    project.complementary_x = data.complementary_x || null
-    project.complementary_y = data.complementary_y || null
-    project.complementary_z = data.complementary_z || null
+    project.complementary_x = (data.complementary_x === '' || data.complementary_x === undefined ? null : data.complementary_x)
+    project.complementary_y = (data.complementary_y === '' || data.complementary_y === undefined ? null : data.complementary_y)
+    project.complementary_z = (data.complementary_z === '' || data.complementary_z === undefined ? null : data.complementary_z)
     project.tagId = data.tag_id
     project.dynmapUrl = data.dynmap_url || null
     project.status = data.status

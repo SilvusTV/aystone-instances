@@ -5,7 +5,7 @@ import { GetObjectCommand } from '@aws-sdk/client-s3'
 
 export default class S3Controller {
   /**
-   * Serve a file from S3
+   * Serve a file from S3 (single-level directory)
    */
   async serveFile({ params, response }: HttpContext) {
     try {
@@ -23,31 +23,45 @@ export default class S3Controller {
       // Construct the key
       const key = normalizedDirectory ? `${normalizedDirectory}/${filename}` : filename
 
-      // Get the S3 client from the service
-      const s3Client = s3Service.getClient()
-      const bucket = s3Service.getBucket()
-
-      // Get the object from S3
-      const { Body, ContentType } = await s3Client.send(
-        new GetObjectCommand({
-          Bucket: bucket,
-          Key: key,
-        })
-      )
-
-      // Set the content type if available
-      if (ContentType) {
-        response.header('Content-Type', ContentType)
-      }
-
-      // Stream the file directly to the response
-      // @ts-ignore - Body has a transformToByteArray method
-      const fileBuffer = await Body.transformToByteArray()
-      return response.send(fileBuffer)
+      return await this.sendObject(key, response)
     } catch (error) {
       console.error('Error serving file from S3:', error)
       return response.status(404).send('File not found')
     }
+  }
+
+  /**
+   * Serve a file from S3 for two-level directories (e.g., /s3/user/services/file.webp)
+   */
+  async serveNestedFile({ params, response }: HttpContext) {
+    try {
+      const { dir1, dir2, filename } = params
+      const key = `${dir1}/${dir2}/${filename}`
+      return await this.sendObject(key, response)
+    } catch (error) {
+      console.error('Error serving nested file from S3:', error)
+      return response.status(404).send('File not found')
+    }
+  }
+
+  private async sendObject(key: string, response: HttpContext['response']) {
+    const s3Client = s3Service.getClient()
+    const bucket = s3Service.getBucket()
+
+    const { Body, ContentType } = await s3Client.send(
+      new GetObjectCommand({
+        Bucket: bucket,
+        Key: key,
+      })
+    )
+
+    if (ContentType) {
+      response.header('Content-Type', ContentType)
+    }
+
+    // @ts-ignore - Body has a transformToByteArray method
+    const fileBuffer = await Body.transformToByteArray()
+    return response.send(fileBuffer)
   }
 
   /**
