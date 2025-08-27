@@ -74,6 +74,17 @@ export interface InstanceService {
   updatedAt: string | null
 }
 
+export interface UserService {
+  id: number
+  userId: number
+  title: string
+  priceCents: number
+  description: string | null
+  createdAt: string
+  updatedAt: string | null
+  user?: User
+}
+
 export interface PageProps {
   auth?: {
     user: User | null
