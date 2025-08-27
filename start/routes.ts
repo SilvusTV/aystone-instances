@@ -159,26 +159,37 @@ router
   })
   .middleware([middleware.silentAuth()])
 
+
+
+// Nested user services CRUD scoped to instance service page
 router
-  .get('/instances/:name/service/edit', async (ctx) => {
+  .post('/instances/:name/user-services', async (ctx) => {
     const { default: InstancesController } = await import('#controllers/instances_controller')
-    return new InstancesController().editService(ctx)
+    return new InstancesController().createUserService(ctx)
   })
-  .middleware([middleware.auth(), middleware.instanceAdmin()])
+  .middleware([middleware.auth(), middleware.player()])
 
 router
-  .post('/instances/:name/service', async (ctx) => {
+  .post('/instances/:name/user-services/:id', async (ctx) => {
     const { default: InstancesController } = await import('#controllers/instances_controller')
-    return new InstancesController().updateService(ctx)
+    return new InstancesController().updateUserService(ctx)
   })
-  .middleware([middleware.auth(), middleware.instanceAdmin()])
+  .middleware([middleware.auth(), middleware.player()])
 
 router
-  .post('/api/instances/:name/service/upload-image', async (ctx) => {
+  .delete('/instances/:name/user-services/:id', async (ctx) => {
     const { default: InstancesController } = await import('#controllers/instances_controller')
-    return new InstancesController().uploadServiceImage(ctx)
+    return new InstancesController().deleteUserService(ctx)
   })
-  .middleware([middleware.auth(), middleware.instanceAdmin()])
+  .middleware([middleware.auth(), middleware.player()])
+
+
+router
+  .post('/api/instances/:name/user-services/upload-image', async (ctx) => {
+    const { default: InstancesController } = await import('#controllers/instances_controller')
+    return new InstancesController().uploadUserServiceImage(ctx)
+  })
+  .middleware([middleware.auth(), middleware.player()])
 
 // Auth routes
 router

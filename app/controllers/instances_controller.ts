@@ -6,6 +6,7 @@ import InstanceDescription from '#models/instance_description'
 import UserVisitedProject from '#models/user_visited_project'
 import InstanceService from '#models/instance_service'
 import s3Service from '#services/s3_service'
+import UserService from '#models/user_service'
 
 export default class InstancesController {
   async index({ inertia }: HttpContext) {
@@ -202,15 +203,20 @@ export default class InstancesController {
     return inertia.render('instances/dynmap', { instance })
   }
 
-  // Service view
+  // Service view (only player services shown)
   async service({ inertia, params, auth }: HttpContext) {
     const instance = await Instance.findByOrFail('name', params.name)
-    await instance.load('service')
 
-    const canEdit =
-      !!auth.user && (auth.user.role === 'admin' || (auth.user.role === 'instanceAdmin' && auth.user.instanceId === instance.id))
+    // Load user services belonging to users of this instance
+    const userServices = await UserService.query()
+      .whereHas('user', (qb) => qb.where('instance_id', instance.id))
+      .preload('user')
+      .orderBy('created_at', 'desc')
+      .exec()
 
-    return inertia.render('instances/service', { instance, canEdit })
+    const canManageUserServices = !!auth.user && ['joueur', 'instanceAdmin', 'admin'].includes(auth.user.role) && (auth.user.role === 'admin' || auth.user.instanceId === instance.id)
+
+    return inertia.render('instances/service', { instance, userServices, canManageUserServices })
   }
 
   // Service edit page
@@ -300,5 +306,145 @@ export default class InstancesController {
       console.error('Error uploading service image:', error)
       return response.status(500).json({ error: 'Échec du téléversement de l\'image' })
     }
+  }
+
+  // Upload image for user service description (player-accessible) and convert to WebP
+  async uploadUserServiceImage({ params, request, response, auth }: HttpContext) {
+    try {
+      const instance = await Instance.findByOrFail('name', params.name)
+      const user = auth.user!
+      if (!user || (user.role !== 'admin' && user.instanceId !== instance.id)) {
+        return response.status(403).json({ error: "Non autorisé" })
+      }
+
+      const file = request.file('image') || request.file('file')
+      if (!file || !file.tmpPath) {
+        return response.status(400).json({ error: 'Aucune image fournie' })
+      }
+
+      const sharp = (await import('sharp')).default
+      const inputBuffer = await import('node:fs/promises').then((fs) => fs.readFile(file.tmpPath!))
+      const webpBuffer = await sharp(inputBuffer).webp({ quality: 80 }).toBuffer()
+
+      const unique = `${Date.now()}_${Math.random().toString(36).slice(2)}`
+      const filename = `${unique}.webp`
+      const key = `user/player_services/${filename}`
+
+      await s3Service.uploadBuffer(webpBuffer, key, 'image/webp')
+
+      const url = `/s3/user/player_services/${filename}`
+      return response.json({ url })
+    } catch (error) {
+      console.error('Error uploading user service image:', error)
+      return response.status(500).json({ error: "Échec du téléversement de l'image" })
+    }
+  }
+
+  // ===== User services (CRUD within instance page) =====
+  async createUserService({ params, request, response, auth, session }: HttpContext) {
+    const instance = await Instance.findByOrFail('name', params.name)
+    const user = auth.user!
+
+    // must be logged in, be admin or belong to this instance
+    if (!user || (user.role !== 'admin' && user.instanceId !== instance.id)) {
+      session?.flash('error', "Vous n'avez pas l'autorisation de créer un service ici")
+      return response.redirect().back()
+    }
+
+    const { title, price, priceCents, description } = request.only(['title', 'price', 'priceCents', 'description'])
+
+    const parseNumber = (v: unknown): number => {
+      if (typeof v === 'number') return v
+      if (v === null || v === undefined) return NaN
+      const s = String(v).replace(/\s+/g, '').replace(',', '.').trim()
+      const n = Number(s)
+      return isNaN(n) ? NaN : n
+    }
+
+    const centsFromPayload = parseNumber(priceCents)
+    const eurosFromPayload = parseNumber(price)
+
+    let computedPriceCents = 0
+    if (!isNaN(centsFromPayload)) {
+      computedPriceCents = Math.max(0, Math.round(centsFromPayload))
+    } else if (!isNaN(eurosFromPayload)) {
+      computedPriceCents = Math.max(0, Math.round(eurosFromPayload * 100))
+    }
+
+    await UserService.create({
+      userId: user.id,
+      title,
+      priceCents: computedPriceCents,
+      description: description ?? null,
+    })
+
+    session?.flash('success', 'Service créé avec succès')
+    return response.redirect(`/instances/${instance.name}/service`)
+  }
+
+  async updateUserService({ params, request, response, auth, session }: HttpContext) {
+    const instance = await Instance.findByOrFail('name', params.name)
+    const user = auth.user!
+    const service = await UserService.query().where('id', params.id).preload('user').first()
+    if (!service) {
+      session?.flash('error', 'Service introuvable')
+      return response.redirect(`/instances/${instance.name}/service`)
+    }
+    const belongsToInstance = service.user && service.user.instanceId === instance.id
+    const isOwner = user && service.userId === user.id
+    const isAdmin = user && user.role === 'admin'
+    if (!user || (!isAdmin && !(isOwner && belongsToInstance))) {
+      session?.flash('error', "Vous n'avez pas l'autorisation de modifier ce service")
+      return response.redirect(`/instances/${instance.name}/service`)
+    }
+
+    const { title, price, priceCents, description } = request.only(['title', 'price', 'priceCents', 'description'])
+
+    const parseNumber = (v: unknown): number => {
+      if (typeof v === 'number') return v
+      if (v === null || v === undefined) return NaN
+      const s = String(v).replace(/\s+/g, '').replace(',', '.').trim()
+      const n = Number(s)
+      return isNaN(n) ? NaN : n
+    }
+
+    const centsFromPayload = parseNumber(priceCents)
+    const eurosFromPayload = parseNumber(price)
+
+    let computedPriceCents = 0
+    if (!isNaN(centsFromPayload)) {
+      computedPriceCents = Math.max(0, Math.round(centsFromPayload))
+    } else if (!isNaN(eurosFromPayload)) {
+      computedPriceCents = Math.max(0, Math.round(eurosFromPayload * 100))
+    }
+
+    service.title = title
+    service.priceCents = computedPriceCents
+    service.description = description ?? null
+    await service.save()
+
+    session?.flash('success', 'Service modifié avec succès')
+    return response.redirect(`/instances/${instance.name}/service`)
+  }
+
+  async deleteUserService({ params, response, auth, session }: HttpContext) {
+    const instance = await Instance.findByOrFail('name', params.name)
+    const user = auth.user!
+    const service = await UserService.query().where('id', params.id).preload('user').first()
+    if (!service) {
+      session?.flash('error', 'Service introuvable')
+      return response.redirect(`/instances/${instance.name}/service`)
+    }
+    const belongsToInstance = service.user && service.user.instanceId === instance.id
+    const isOwner = user && service.userId === user.id
+    const isAdmin = user && user.role === 'admin'
+    if (!user || (!isAdmin && !(isOwner && belongsToInstance))) {
+      session?.flash('error', "Vous n'avez pas l'autorisation de supprimer ce service")
+      return response.redirect(`/instances/${instance.name}/service`)
+    }
+
+    await service.delete()
+    session?.flash('success', 'Service supprimé avec succès')
+    return response.redirect(`/instances/${instance.name}/service`)
   }
 }
