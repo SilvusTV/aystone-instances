@@ -28,8 +28,10 @@ export default function Layout({ children }: LayoutProps) {
 
   // Function to handle CSRF token errors
   const handleCsrfError = (response) => {
-    if (response.status === 419 || 
-        (response.status === 500 && response.statusText.includes('CSRF'))) {
+    if (
+      response.status === 419 ||
+      (response.status === 500 && response.statusText.includes('CSRF'))
+    ) {
       // Refresh the page to get a new CSRF token
       window.location.reload()
       return true
@@ -91,9 +93,9 @@ export default function Layout({ children }: LayoutProps) {
         const dropdown = document.getElementById('user-dropdown')
         const dropdownButton = document.getElementById('user-dropdown-button')
         if (
-          dropdown && 
-          dropdownButton && 
-          !dropdown.contains(event.target) && 
+          dropdown &&
+          dropdownButton &&
+          !dropdown.contains(event.target) &&
           !dropdownButton.contains(event.target)
         ) {
           setIsDropdownOpen(false)
@@ -130,16 +132,16 @@ export default function Layout({ children }: LayoutProps) {
           value: newDarkMode.toString(),
         }),
       })
-      .then(response => {
-        if (handleCsrfError(response)) {
-          return null
-        }
-        return response
-      })
-      .catch(() => {
-        // Silently fail - the preference will still be applied to the current session
-        // but won't be persisted for future sessions
-      })
+        .then((response) => {
+          if (handleCsrfError(response)) {
+            return null
+          }
+          return response
+        })
+        .catch(() => {
+          // Silently fail - the preference will still be applied to the current session
+          // but won't be persisted for future sessions
+        })
     } else {
       // If user is not logged in, save to localStorage
       localStorage.setItem('darkMode', newDarkMode.toString())
@@ -149,7 +151,13 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className={`${darkMode ? 'dark' : ''} overflow-x-hidden`}>
       <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-        <header className="text-white shadow-md" style={{ background: "linear-gradient(90deg,rgba(190, 77, 196, 1) 0%, rgba(147, 87, 199, 1) 50%, rgba(84, 22, 219, 1) 100%)" }}>
+        <header
+          className="text-white shadow-md"
+          style={{
+            background:
+              'linear-gradient(90deg,rgba(190, 77, 196, 1) 0%, rgba(147, 87, 199, 1) 50%, rgba(84, 22, 219, 1) 100%)',
+          }}
+        >
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <div className="flex items-center">
               <Link href="/" className="text-2xl font-bold">
@@ -166,22 +174,32 @@ export default function Layout({ children }: LayoutProps) {
               >
                 {darkMode ? '☀️' : '🌙'}
               </button>
-              <button 
+              <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="text-white focus:outline-none"
                 aria-label="Toggle mobile menu"
               >
-                <svg 
-                  className="w-6 h-6" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24" 
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   {isMobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
                   )}
                 </svg>
               </button>
@@ -198,6 +216,9 @@ export default function Layout({ children }: LayoutProps) {
               <Link href="/utils" className="hover:text-primary-200 transition">
                 Liens utiles
               </Link>
+              <Link href="/portfolio" className="hover:text-primary-200 transition">
+                Portfolio
+              </Link>
               <Link href="/about" className="hover:text-primary-200 transition">
                 À propos
               </Link>
@@ -205,17 +226,17 @@ export default function Layout({ children }: LayoutProps) {
               {auth.user ? (
                 <div className="flex items-center space-x-4">
                   {['joueur', 'instanceAdmin', 'admin'].includes(auth.user.role) && (
-                  <Link href="/dashboard" className="hover:text-primary-200 transition">
-                    Mes projets
-                  </Link>
+                    <Link href="/dashboard" className="hover:text-primary-200 transition">
+                      Mes projets
+                    </Link>
                   )}
                   {['admin'].includes(auth.user.role) && (
-                  <Link href="/dashboard/s3" className="hover:text-primary-200 transition">
-                    Gestionnaire S3
-                  </Link>
+                    <Link href="/dashboard/s3" className="hover:text-primary-200 transition">
+                      Gestionnaire S3
+                    </Link>
                   )}
                   <div className="relative">
-                    <div 
+                    <div
                       id="user-dropdown-button"
                       className="flex items-center space-x-2 cursor-pointer hover:text-primary-200 transition"
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -226,21 +247,29 @@ export default function Layout({ children }: LayoutProps) {
                         className="w-8 h-8 rounded"
                       />
                       <span>{auth.user.username}</span>
-                      <svg 
-                        className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24" 
+                      <svg
+                        className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        ></path>
                       </svg>
                     </div>
 
                     {isDropdownOpen && (
-                      <div id="user-dropdown" className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10">
+                      <div
+                        id="user-dropdown"
+                        className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10"
+                      >
                         {isAdmin && (
-                          <Link 
+                          <Link
                             href={`/admin/users`}
                             className="block px-4 py-2 text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                             onClick={() => setIsDropdownOpen(false)}
@@ -248,8 +277,8 @@ export default function Layout({ children }: LayoutProps) {
                             Gestion des membres
                           </Link>
                         )}
-                        <Link 
-                          href="/profile" 
+                        <Link
+                          href="/profile"
                           className="block px-4 py-2 text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                           onClick={() => setIsDropdownOpen(false)}
                         >
@@ -299,29 +328,36 @@ export default function Layout({ children }: LayoutProps) {
           {isMobileMenuOpen && (
             <div className="md:hidden bg-primary-800 text-white">
               <div className="container mx-auto px-4 py-3 space-y-3">
-                <Link 
-                  href="/" 
+                <Link
+                  href="/"
                   className="block py-2 hover:text-primary-200 transition"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Accueil
                 </Link>
-                <Link 
-                  href="/instances" 
+                <Link
+                  href="/instances"
                   className="block py-2 hover:text-primary-200 transition"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Instances
                 </Link>
-                <Link 
-                  href="/utils" 
+                <Link
+                  href="/utils"
                   className="block py-2 hover:text-primary-200 transition"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Liens utiles
                 </Link>
-                <Link 
-                  href="/about" 
+                <Link
+                  href="/portfolio"
+                  className="block py-2 hover:text-primary-200 transition"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Portfolio
+                </Link>
+                <Link
+                  href="/about"
                   className="block py-2 hover:text-primary-200 transition"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -331,8 +367,8 @@ export default function Layout({ children }: LayoutProps) {
                 {auth.user ? (
                   <div className="border-t border-primary-700 pt-3 space-y-3">
                     {['joueur', 'instanceAdmin', 'admin'].includes(auth.user.role) && (
-                      <Link 
-                        href="/dashboard" 
+                      <Link
+                        href="/dashboard"
                         className="block py-2 hover:text-primary-200 transition"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
@@ -340,8 +376,8 @@ export default function Layout({ children }: LayoutProps) {
                       </Link>
                     )}
                     {['admin'].includes(auth.user.role) && (
-                      <Link 
-                        href="/dashboard/s3" 
+                      <Link
+                        href="/dashboard/s3"
                         className="block py-2 hover:text-primary-200 transition"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
@@ -349,7 +385,7 @@ export default function Layout({ children }: LayoutProps) {
                       </Link>
                     )}
                     {isAdmin && (
-                      <Link 
+                      <Link
                         href={`/admin/users`}
                         className="block py-2 hover:text-primary-200 transition"
                         onClick={() => setIsMobileMenuOpen(false)}
@@ -357,8 +393,8 @@ export default function Layout({ children }: LayoutProps) {
                         Gestion des membres
                       </Link>
                     )}
-                    <Link 
-                      href="/profile" 
+                    <Link
+                      href="/profile"
                       className="block py-2 hover:text-primary-200 transition"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
@@ -409,7 +445,7 @@ export default function Layout({ children }: LayoutProps) {
             <p>Fait avec ❤️(Kaka) par Silvus_TV</p>
           </div>
         </footer>
-        
+
         {/* Toast Container for notifications */}
         <ToastContainer />
       </div>
