@@ -90,6 +90,20 @@ router
   })
   .middleware([middleware.silentAuth()])
 
+router
+  .get('/portfolio', async (ctx) => {
+    const { default: PortfolioController } = await import('#controllers/portfolio_controller')
+    return new PortfolioController().show(ctx)
+  })
+  .middleware([middleware.silentAuth()])
+
+router
+  .get('/api/portfolio', async (ctx) => {
+    const { default: PortfolioController } = await import('#controllers/portfolio_controller')
+    return new PortfolioController().index(ctx)
+  })
+  .middleware([middleware.silentAuth()])
+
 // Instances routes
 router
   .get('/instances', async (ctx) => {
@@ -159,8 +173,6 @@ router
   })
   .middleware([middleware.silentAuth()])
 
-
-
 // Nested user services CRUD scoped to instance service page
 router
   .post('/instances/:name/user-services', async (ctx) => {
@@ -182,7 +194,6 @@ router
     return new InstancesController().deleteUserService(ctx)
   })
   .middleware([middleware.auth(), middleware.player()])
-
 
 router
   .post('/api/instances/:name/user-services/upload-image', async (ctx) => {
@@ -239,13 +250,12 @@ router
   .middleware([middleware.guest()])
 
 // Route for password reset page
-router
-  .get('/reset-password', async (ctx) => {
-    const { default: AuthController } = await import('#controllers/auth_controller')
-    return new AuthController().showResetPassword(ctx)
-  })
-  // No middleware for debugging purposes
-  // .middleware([middleware.guest()])
+router.get('/reset-password', async (ctx) => {
+  const { default: AuthController } = await import('#controllers/auth_controller')
+  return new AuthController().showResetPassword(ctx)
+})
+// No middleware for debugging purposes
+// .middleware([middleware.guest()])
 
 router
   .post('/reset-password', async (ctx) => {
@@ -281,10 +291,9 @@ router
   .middleware([middleware.auth()])
 
 // Test route for debugging
-router
-  .get('/test-reset', async (ctx) => {
-    return ctx.inertia.render('test-reset')
-  })
+router.get('/test-reset', async (ctx) => {
+  return ctx.inertia.render('test-reset')
+})
 
 // Projects routes (public)
 router
@@ -356,7 +365,9 @@ router
 // Project ratings routes
 router
   .post('/projects/:id/ratings', async (ctx) => {
-    const { default: ProjectRatingsController } = await import('#controllers/project_ratings_controller')
+    const { default: ProjectRatingsController } = await import(
+      '#controllers/project_ratings_controller'
+    )
     return new ProjectRatingsController().store(ctx)
   })
   .middleware([middleware.auth()])
@@ -364,28 +375,36 @@ router
 // Project visit routes (for visiteurPlus role)
 router
   .post('/projects/:id/visit', async (ctx) => {
-    const { default: ProjectVisitsController } = await import('#controllers/project_visits_controller')
+    const { default: ProjectVisitsController } = await import(
+      '#controllers/project_visits_controller'
+    )
     return new ProjectVisitsController().markAsVisited(ctx)
   })
   .middleware([middleware.auth(), middleware.visiteurPlus()])
 
 router
   .delete('/projects/:id/visit', async (ctx) => {
-    const { default: ProjectVisitsController } = await import('#controllers/project_visits_controller')
+    const { default: ProjectVisitsController } = await import(
+      '#controllers/project_visits_controller'
+    )
     return new ProjectVisitsController().markAsNotVisited(ctx)
   })
   .middleware([middleware.auth(), middleware.visiteurPlus()])
 
 router
   .get('/projects/:id/visit', async (ctx) => {
-    const { default: ProjectVisitsController } = await import('#controllers/project_visits_controller')
+    const { default: ProjectVisitsController } = await import(
+      '#controllers/project_visits_controller'
+    )
     return new ProjectVisitsController().getVisitStatus(ctx)
   })
   .middleware([middleware.auth()])
 
 router
   .get('/projects/visited', async (ctx) => {
-    const { default: ProjectVisitsController } = await import('#controllers/project_visits_controller')
+    const { default: ProjectVisitsController } = await import(
+      '#controllers/project_visits_controller'
+    )
     return new ProjectVisitsController().getVisitedProjects(ctx)
   })
   .middleware([middleware.auth()])
